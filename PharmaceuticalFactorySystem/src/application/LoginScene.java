@@ -4,11 +4,16 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
+import javafx.animation.FadeTransition;
+import javafx.animation.ScaleTransition;
+import javafx.animation.TranslateTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
@@ -16,192 +21,341 @@ import javafx.scene.paint.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 public class LoginScene {
 
     private Scene loginScene;
     private Stage loginStage;
+    private VBox loginContainer;
+    private TextField userName;
+    private PasswordField passwordField;
+    
     public LoginScene() {
-        StackPane s = new StackPane();
-        s.setBackground(createDiagonalGradient());
+        StackPane root = new StackPane();
+        root.setBackground(createModernGradient());
 
-        VBox all = new VBox();
-        all.setSpacing(10);
-        all.setAlignment(Pos.TOP_CENTER);
-        all.setPadding(new Insets(30));
-        all.setStyle("-fx-background-color: rgba(255, 255, 255, 0.1); -fx-background-radius: 15;");
-        all.setMaxWidth(500);
+        loginContainer = createLoginContainer();
+        
+        addEntranceAnimation(loginContainer);
 
-        ImageView logo = new ImageView(new Image("samaLogo.png"));
-        logo.setFitHeight(160);
-        logo.setFitWidth(160);
+        root.getChildren().add(loginContainer);
 
-        Label title = new Label("Welcome to Sama Pharma System");
-        styleTitle(title);
-        VBox.setMargin(title, new Insets(5, 0, 15, 0));
-
-        TextField userName = new TextField();
-        userName.setPromptText("User Name");
-        styleInput(userName);
-        Label userIcon = createIcon("\uD83D\uDC64");
-        HBox userBox = new HBox(10, userIcon, userName);
-        userBox.setAlignment(Pos.CENTER);
-
-        PasswordField passwordField = new PasswordField();
-        passwordField.setPromptText("Password");
-        styleInput(passwordField);
-        Label lockIcon = createIcon("\uD83D\uDD12");
-        HBox passwordBox = new HBox(10, lockIcon, passwordField);
-        passwordBox.setAlignment(Pos.CENTER);
-
-        Button login = createLoginButton();
-        VBox.setMargin(login, new Insets(10, 0, 0, 25));
-        login.setOnAction(e->{
-        	String checkQuery = "SELECT * FROM users WHERE username = ? AND password = ?";
-        	try (PreparedStatement checkdata = Main.conn.prepareStatement(checkQuery)){
-        		checkdata.setString(1, userName.getText().trim());
-        		checkdata.setString(2, passwordField.getText().trim());
-        		
-        		ResultSet r = checkdata.executeQuery();
-        		if (r.next()) {
-        			String name= r.getString("username");
-        			String role = r.getString("role");
-        			Alert successAlert = new Alert (AlertType.INFORMATION);
-        			successAlert.setTitle("Success login");
-        			successAlert.setHeaderText("Welcome " + name +",\nLogged in as " + role);
-        			ImageView trueI =new ImageView (new Image("true.png"));
-        			trueI.setFitWidth(50);
-        			trueI.setFitHeight(50);
-        			successAlert.setGraphic(trueI);
-        			DialogPane dialogPane = successAlert.getDialogPane();
-        			dialogPane.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
-        			dialogPane.getStyleClass().add("dialog-pane");
-        			Stage stage = (Stage) successAlert.getDialogPane().getScene().getWindow();
-        			stage.getIcons().add(new Image("true.png"));
-
-        			successAlert.showAndWait();
-        			new UserStage();
-        		}
-        		else {
-        			Alert inValid = new Alert (AlertType.ERROR);
-        			inValid.setTitle("Fail login");
-        			inValid.setHeaderText("Invalid info");
-        			ImageView falseI =new ImageView (new Image("false.png"));
-        			falseI.setFitWidth(50);
-        			falseI.setFitHeight(50);
-        			DialogPane dialogPane = inValid.getDialogPane();
-        			dialogPane.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
-        			dialogPane.getStyleClass().add("dialog-pane");
-        			Stage stage = (Stage) inValid.getDialogPane().getScene().getWindow();
-        			stage.getIcons().add(new Image("false.png"));
-        			inValid.setGraphic(falseI);
-        			inValid.showAndWait();
-        		}
-        	}catch (Exception ee) {
-        		
-        	}
-        });
-        all.getChildren().addAll(logo, title, userBox, passwordBox, login);
-        s.getChildren().add(all);
-
-        loginScene = new Scene(s, 500, 500);
-        loginStage = new Stage ();
+        loginScene = new Scene(root, 450, 650);
+        loginStage = new Stage();
         loginStage.setScene(loginScene);
-        loginStage.setTitle("Login");
-        loginStage.getIcons().add(new Image ("login.png"));
+        loginStage.setTitle("Sama Pharma - Login");
+        loginStage.getIcons().add(new Image("login.png"));
+        loginStage.setResizable(false);
+    }
+
+    private VBox createLoginContainer() {
+        VBox container = new VBox();
+        container.setSpacing(25);
+        container.setAlignment(Pos.CENTER);
+        container.setPadding(new Insets(40, 50, 40, 50));
+        container.setMaxWidth(450);
+        
+        container.setStyle("""
+            -fx-background-color: rgba(255, 255, 255, 0.15);
+            -fx-background-radius: 25;
+            -fx-border-color: rgba(255, 255, 255, 0.3);
+            -fx-border-width: 1;
+            -fx-border-radius: 25;
+        """);
+
+        DropShadow shadow = new DropShadow();
+        shadow.setColor(Color.rgb(0, 0, 0, 0.3));
+        shadow.setRadius(20);
+        shadow.setOffsetY(10);
+        container.setEffect(shadow);
+
+        ImageView logo = createAnimatedLogo();
+        
+        VBox headerSection = createHeaderSection();
+        
+        VBox inputSection = createInputSection();
+        
+        Button loginButton = createModernLoginButton();
+
+        container.getChildren().addAll(logo, headerSection, inputSection, loginButton);
+        return container;
+    }
+
+    private ImageView createAnimatedLogo() {
+        ImageView logo = new ImageView(new Image("samaLogo.png"));
+        logo.setFitHeight(120);
+        logo.setFitWidth(120);
+        logo.setPreserveRatio(true);
+        
+        TranslateTransition floatAnimation = new TranslateTransition(Duration.seconds(3), logo);
+        floatAnimation.setFromY(-5);
+        floatAnimation.setToY(5);
+        floatAnimation.setCycleCount(TranslateTransition.INDEFINITE);
+        floatAnimation.setAutoReverse(true);
+        floatAnimation.play();
+        
+        return logo;
+    }
+
+    private VBox createHeaderSection() {
+        VBox header = new VBox(8);
+        header.setAlignment(Pos.CENTER);
+        
+        Label title = new Label("Welcome Back");
+        title.setStyle("""
+            -fx-text-fill: white;
+            -fx-font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            -fx-font-size: 28px;
+            -fx-font-weight: bold;
+        """);
+        
+        Label subtitle = new Label("Sign in to Sama Pharma System");
+        subtitle.setStyle("""
+            -fx-text-fill: rgba(255, 255, 255, 0.8);
+            -fx-font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            -fx-font-size: 14px;
+        """);
+        
+        header.getChildren().addAll(title, subtitle);
+        VBox.setMargin(header, new Insets(0, 0, 20, 0));
+        return header;
+    }
+
+    private VBox createInputSection() {
+        VBox inputSection = new VBox(20);
+        inputSection.setAlignment(Pos.CENTER);
+        
+        userName = new TextField();
+        userName.setPromptText("Enter your username");
+        styleModernInput(userName);
+        HBox userBox = createInputBox("👤", userName);
+        
+        passwordField = new PasswordField();
+        passwordField.setPromptText("Enter your password");
+        styleModernInput(passwordField);
+        HBox passwordBox = createInputBox("🔒", passwordField);
+        
+        
+        
+        inputSection.getChildren().addAll(userBox, passwordBox);
+        return inputSection;
+    }
+
+    private HBox createInputBox(String icon, TextField field) {
+        HBox box = new HBox(15);
+        box.setAlignment(Pos.CENTER_LEFT);
+        box.setPadding(new Insets(12, 16, 12, 16));
+        box.setStyle("""
+            -fx-background-color: rgba(255, 255, 255, 0.1);
+            -fx-background-radius: 15;
+            -fx-border-color: rgba(255, 255, 255, 0.2);
+            -fx-border-width: 1;
+            -fx-border-radius: 15;
+        """);
+        
+        Label iconLabel = new Label(icon);
+        iconLabel.setStyle("""
+            -fx-text-fill: rgba(255, 255, 255, 0.7);
+            -fx-font-size: 16px;
+        """);
+        
+        field.setStyle("""
+            -fx-background-color: transparent;
+            -fx-text-fill: white;
+            -fx-prompt-text-fill: rgba(255, 255, 255, 0.6);
+            -fx-border-width: 0;
+            -fx-font-size: 14px;
+        """);
+        field.setPrefWidth(280);
+        
+        field.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal) {
+                box.setStyle("""
+                    -fx-background-color: rgba(255, 255, 255, 0.15);
+                    -fx-background-radius: 15;
+                    -fx-border-color: rgba(178, 230, 161, 0.8);
+                    -fx-border-width: 2;
+                    -fx-border-radius: 15;
+                """);
+            } else {
+                box.setStyle("""
+                    -fx-background-color: rgba(255, 255, 255, 0.1);
+                    -fx-background-radius: 15;
+                    -fx-border-color: rgba(255, 255, 255, 0.2);
+                    -fx-border-width: 1;
+                    -fx-border-radius: 15;
+                """);
+            }
+        });
+        
+        box.getChildren().addAll(iconLabel, field);
+        return box;
+    }
+
+    private Button createModernLoginButton() {
+        Button loginButton = new Button("Sign In");
+        loginButton.setPrefWidth(350);
+        loginButton.setPrefHeight(50);
+        
+        loginButton.setStyle("""
+            -fx-background-color: linear-gradient(to right, #b2e6a1, #a1d490);
+            -fx-text-fill: #2c5364;
+            -fx-font-weight: bold;
+            -fx-font-size: 16px;
+            -fx-background-radius: 25;
+            -fx-border-radius: 25;
+            -fx-cursor: hand;
+        """);
+
+        loginButton.setOnMouseEntered(e -> {
+            loginButton.setStyle("""
+                -fx-background-color: linear-gradient(to right, #a1d490, #90c47f);
+                -fx-text-fill: #2c5364;
+                -fx-font-weight: bold;
+                -fx-font-size: 16px;
+                -fx-background-radius: 25;
+                -fx-border-radius: 25;
+                -fx-cursor: hand;
+            """);
+            
+            ScaleTransition scale = new ScaleTransition(Duration.millis(100), loginButton);
+            scale.setToX(1.05);
+            scale.setToY(1.05);
+            scale.play();
+        });
+
+        loginButton.setOnMouseExited(e -> {
+            loginButton.setStyle("""
+                -fx-background-color: linear-gradient(to right, #b2e6a1, #a1d490);
+                -fx-text-fill: #2c5364;
+                -fx-font-weight: bold;
+                -fx-font-size: 16px;
+                -fx-background-radius: 25;
+                -fx-border-radius: 25;
+                -fx-cursor: hand;
+            """);
+            
+            ScaleTransition scale = new ScaleTransition(Duration.millis(100), loginButton);
+            scale.setToX(1.0);
+            scale.setToY(1.0);
+            scale.play();
+        });
+
+        loginButton.setOnAction(e -> handleLogin());
+
+        VBox.setMargin(loginButton, new Insets(20, 0, 0, 0));
+        return loginButton;
+    }
+
+    private void handleLogin() {
+        Button loginButton = (Button) loginContainer.getChildren().get(3);
+        loginButton.setText("Signing in...");
+        loginButton.setDisable(true);
+        
+        String checkQuery = "SELECT * FROM users WHERE username = ? AND password = ?";
+        try (PreparedStatement checkdata = Main.conn.prepareStatement(checkQuery)) {
+            checkdata.setString(1, userName.getText().trim());
+            checkdata.setString(2, passwordField.getText().trim());
+            
+            ResultSet r = checkdata.executeQuery();
+            if (r.next()) {
+                String name = r.getString("username");
+                String role = r.getString("role");
+                showModernAlert(true, "Welcome " + name, "Logged in as " + role);
+                new UserStage();
+            } else {
+                showModernAlert(false, "Login Failed", "Invalid username or password");
+            }
+        } catch (Exception ex) {
+            showModernAlert(false, "Error", "Connection failed. Please try again.");
+        } finally {
+            loginButton.setText("Sign In");
+            loginButton.setDisable(false);
+        }
+    }
+
+    private void showModernAlert(boolean isSuccess, String title, String message) {
+        Alert alert = new Alert(isSuccess ? AlertType.INFORMATION : AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        
+        DialogPane dialogPane = alert.getDialogPane();
+        dialogPane.setStyle("""
+            -fx-background-color: #2c5364;
+            -fx-border-color: #ffffff4d;
+            -fx-border-width: 1;
+            -fx-border-radius: 15;
+            -fx-background-radius: 15;
+        """);
+        
+        if (dialogPane.lookup(".content.label") != null) {
+            dialogPane.lookup(".content.label").setStyle("""
+                -fx-text-fill: white;
+                -fx-font-size: 14px;
+            """);
+        }
+        
+        dialogPane.lookupAll(".button").forEach(node -> {
+            if (node instanceof Button) {
+                node.setStyle("""
+                    -fx-background-color: #b2e6a1;
+                    -fx-text-fill: #2c5364;
+                    -fx-font-weight: bold;
+                    -fx-background-radius: 10;
+                """);
+            }
+        });
+        
+        Stage stage = (Stage) dialogPane.getScene().getWindow();
+        stage.getIcons().add(new Image(isSuccess ? "true.png" : "false.png"));
+        
+        alert.showAndWait();
+    }
+
+    private void addEntranceAnimation(VBox container) {
+        container.setOpacity(0);
+        container.setTranslateY(50);
+        
+        FadeTransition fade = new FadeTransition(Duration.millis(800), container);
+        fade.setFromValue(0);
+        fade.setToValue(1);
+        
+        TranslateTransition slide = new TranslateTransition(Duration.millis(800), container);
+        slide.setFromY(50);
+        slide.setToY(0);
+        
+        fade.play();
+        slide.play();
+    }
+
+    private void styleModernInput(TextField field) {
+        field.setStyle("""
+            -fx-background-color: transparent;
+            -fx-text-fill: white;
+            -fx-prompt-text-fill: rgba(255, 255, 255, 0.6);
+            -fx-border-width: 0;
+            -fx-font-size: 14px;
+        """);
+    }
+
+    private Background createModernGradient() {
+        LinearGradient gradient = new LinearGradient(
+            0, 0, 1, 1, true, CycleMethod.NO_CYCLE,
+            new Stop(0, Color.web("#0f2027")),
+            new Stop(0.3, Color.web("#203a43")),
+            new Stop(0.7, Color.web("#2c5364")),
+            new Stop(1, Color.web("#0f2027"))
+        );
+        return new Background(new BackgroundFill(gradient, CornerRadii.EMPTY, Insets.EMPTY));
     }
 
     public Scene getLoginScene() {
         return loginScene;
     }
+
     public Stage getLoginStage() {
-    	return loginStage;
-    }
-
-    private void styleInput(TextField field) {
-        field.setStyle("""
-            -fx-background-color: transparent;
-            -fx-text-fill: white;
-            -fx-prompt-text-fill: #dddddd;
-            -fx-border-color: white;
-            -fx-border-width: 1;
-            -fx-background-radius: 10;
-            -fx-border-radius: 10;
-            -fx-padding: 6;
-        """);
-        field.setPrefWidth(240);
-    }
-
-    private void styleTitle(Label title) {
-        title.setTextFill(Color.WHITE);
-        title.setFont(Font.font("Georgia", FontWeight.BOLD, 20));
-    }
-
-    private Label createIcon(String unicode) {
-        Label icon = new Label(unicode);
-        icon.setStyle("-fx-text-fill: white; -fx-font-size: 16px;");
-        return icon;
-    }
-    
-    private Button createLoginButton() {
-        Button loginButton = new Button("LOG IN");
-        loginButton.setStyle(defaultButtonStyle());
-        loginButton.setPrefWidth(200);
-
-        loginButton.setOnMouseEntered(e -> loginButton.setStyle(hoverButtonStyle()));
-        loginButton.setOnMouseExited(e -> loginButton.setStyle(defaultButtonStyle()));
-        loginButton.setOnAction(e -> System.out.println("Login clicked"));
-
-        return loginButton;
-    }
-    public Stage showAlert (String name , String role) {
-    	VBox alertPane = new VBox();
-    	Scene scene = new Scene (alertPane , 200 , 200);
-    	scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
-
-    	alertPane.setAlignment(Pos.CENTER);
-    	Stage stage = new Stage ();
-    	stage.setTitle("Success login");
-    	stage.setScene(scene);
-    	alertPane.getStyleClass().add("alert-pane");
-
-    	Label title = new Label("Welcome " + name);
-    	title.getStyleClass().add("alert-title");
-
-    	Label subtitle = new Label("You signed in as " + role);
-    	subtitle.getStyleClass().add("alert-subtitle");
-
-    	alertPane.getChildren().addAll(title, subtitle);
-    	
-    	return stage;
-    }
-
-    private String defaultButtonStyle() {
-        return """
-            -fx-background-color: #b2e6a1;
-            -fx-text-fill: black;
-            -fx-font-weight: bold;
-            -fx-background-radius: 20;
-            -fx-padding: 8 0 8 0;
-        """;
-    }
-
-    private String hoverButtonStyle() {
-        return """
-            -fx-background-color: #a1d490;
-            -fx-text-fill: black;
-            -fx-font-weight: bold;
-            -fx-background-radius: 20;
-            -fx-padding: 8 0 8 0;
-        """;
-    }
-    private Background createDiagonalGradient() {
-        LinearGradient diagonal = new LinearGradient(
-            0, 0, 1, 1, true, CycleMethod.NO_CYCLE,
-            new Stop(0, Color.web("#0f2027")),
-            new Stop(0.5, Color.web("#203a43")),	
-            new Stop(1, Color.web("#2c5364"))
-        );
-        return new Background(new BackgroundFill(diagonal, CornerRadii.EMPTY, Insets.EMPTY));
+        return loginStage;
     }
 }

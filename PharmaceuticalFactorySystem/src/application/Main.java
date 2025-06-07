@@ -21,6 +21,8 @@ public class Main extends Application {
 	static Connection conn = DBConnect.getConnection();
 	static ObservableList <User> users=  FXCollections.observableArrayList();
 	static ObservableList <Employee> employees=  FXCollections.observableArrayList();
+	static ObservableList <Department> depatments=  FXCollections.observableArrayList();
+
 
 	@Override
 	public void start(Stage primaryStage) {

@@ -34,7 +34,7 @@ public void addUserToDB() throws SQLException {
     stmt.setString(2, password);
     stmt.setString(3, role);
     stmt.setInt(4, employeeId);
-    stmt.executeQuery();
+    stmt.executeUpdate();
     this.userId = getLastInsertedUserId();
 
    
