@@ -33,6 +33,7 @@ public class Main extends Application {
 		        } else {
 		            System.out.println("X");
 		        }
+		        //Test
 		        loadUsers();
 			new LoginScene().getLoginStage().show();
 		} catch(Exception e) {
