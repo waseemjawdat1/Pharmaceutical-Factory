@@ -33,8 +33,7 @@ public class Main extends Application {
 		        } else {
 		            System.out.println("X");
 		        }
-		        //Test
-		        //Mariam Barghouthi
+		     
 		        loadUsers();
 			new LoginScene().getLoginStage().show();
 		} catch(Exception e) {
