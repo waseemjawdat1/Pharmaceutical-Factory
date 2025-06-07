@@ -34,6 +34,7 @@ public class Main extends Application {
 		            System.out.println("X");
 		        }
 		        //Test
+		        //Mariam Barghouthi
 		        loadUsers();
 			new LoginScene().getLoginStage().show();
 		} catch(Exception e) {
