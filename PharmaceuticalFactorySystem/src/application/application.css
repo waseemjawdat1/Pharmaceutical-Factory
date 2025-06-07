@@ -1,4 +1,4 @@
-/* JavaFX CSS - Leave this comment until you have at least create one rule which uses -fx-Property */
+/* Dialog Styles */
 .dialog-pane {
     -fx-background-color: linear-gradient(to bottom, #f8f2ff, #e4c1f9);
     -fx-background-radius: 15;
@@ -7,7 +7,6 @@
     -fx-font-family: 'Segoe UI', sans-serif;
 }
 
-/* إزالة الخط الفاصل بين العنوان والمحتوى */
 .dialog-pane > .header-panel {
     -fx-border-width: 0;
     -fx-background-insets: 0;
@@ -16,20 +15,17 @@
     -fx-padding: 10 0 5 0;
 }
 
-/* تنسيق عنوان التنبيه */
 .dialog-pane .header-panel .label {
     -fx-font-size: 18px;
     -fx-text-fill: #3E125F;
     -fx-font-weight: bold;
 }
 
-/* تنسيق محتوى التنبيه */
 .dialog-pane .content.label {
     -fx-font-size: 14px;
     -fx-text-fill: #4B0071;
 }
 
-/* تنسيق زر OK */
 .button {
     -fx-background-color: linear-gradient(to bottom, #A66CFF, #E4C1F9);
     -fx-text-fill: white;
@@ -37,4 +33,45 @@
     -fx-background-radius: 10;
     -fx-padding: 6 20;
     -fx-font-size: 13px;
+}
+
+/* TableView Styles */
+.table-view .column-header-background {
+    -fx-background-color: linear-gradient(to bottom, #A66CFF, #E4C1F9);
+    -fx-background-radius: 6px 6px 0 0;
+}
+
+.table-view .column-header {
+    -fx-background-color: transparent;
+    -fx-text-fill: #3E125F;
+    -fx-font-family: 'Georgia';
+    -fx-font-weight: bold;
+    -fx-font-size: 16px;
+    -fx-alignment: CENTER;
+}
+
+.table-view .table-column {
+    -fx-alignment: CENTER;
+}
+
+/* Table Row Selection - Fixed to use solid colors instead of gradients */
+.table-view:focused .table-row-cell:filled:focused:selected {
+    -fx-background-color: #D291BC;
+    -fx-text-fill: #3E125F;
+    -fx-font-weight: bold;
+}
+
+.table-view .table-row-cell:filled:selected {
+    -fx-background-color: #E0BBE4;
+    -fx-text-fill: #3E125F;
+}
+
+/* Additional table cell styling to prevent border issues */
+.table-view .table-cell {
+    -fx-border-color: #f0e6ff;
+}
+
+/* Hover effect for table rows */
+.table-view .table-row-cell:hover {
+    -fx-background-color: #f8f0ff;
 }

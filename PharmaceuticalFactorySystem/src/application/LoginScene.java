@@ -80,6 +80,7 @@ public class LoginScene {
         			stage.getIcons().add(new Image("true.png"));
 
         			successAlert.showAndWait();
+        			new UserStage();
         		}
         		else {
         			Alert inValid = new Alert (AlertType.ERROR);
@@ -115,14 +116,6 @@ public class LoginScene {
     }
     public Stage getLoginStage() {
     	return loginStage;
-    }
-
-    private LinearGradient createGradient() {
-        Stop[] stops = new Stop[]{
-            new Stop(0, Color.web("#6a11cb")),
-            new Stop(1, Color.web("#2575fc"))
-        };
-        return new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, stops);
     }
 
     private void styleInput(TextField field) {
@@ -206,7 +199,7 @@ public class LoginScene {
         LinearGradient diagonal = new LinearGradient(
             0, 0, 1, 1, true, CycleMethod.NO_CYCLE,
             new Stop(0, Color.web("#0f2027")),
-            new Stop(0.5, Color.web("#203a43")),
+            new Stop(0.5, Color.web("#203a43")),	
             new Stop(1, Color.web("#2c5364"))
         );
         return new Background(new BackgroundFill(diagonal, CornerRadii.EMPTY, Insets.EMPTY));
