@@ -65,7 +65,7 @@ public class LoginScene {
         		ResultSet r = checkdata.executeQuery();
         		if (r.next()) {
         			String name= r.getString("username");
-        			String role = r.getString("password");
+        			String role = r.getString("role");
         			Alert successAlert = new Alert (AlertType.INFORMATION);
         			successAlert.setTitle("Success login");
         			successAlert.setHeaderText("Welcome " + name +",\nLogged in as " + role);
