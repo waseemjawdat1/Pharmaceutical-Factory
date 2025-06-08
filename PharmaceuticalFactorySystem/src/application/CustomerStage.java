@@ -44,12 +44,11 @@ public class CustomerStage {
 		
 		Label searchL = new MyLabel("Search Name");
 		TextField searchTF = new MyTextField();
-		Button search = new MyButton("🔍 Search", 2);
 		
-		HBox searchBox = new HBox(10, searchL, searchTF, search);
+		HBox searchBox = new HBox(10, searchL, searchTF);
 		searchBox.setAlignment(Pos.CENTER);
 		
-		search.setOnAction(e -> {
+		searchTF.setOnKeyTyped(e -> {
 			String nameS = searchTF.getText();
 			if (nameS == null || nameS.isEmpty()) {
 				customerTable.setItems(Main.customers);
