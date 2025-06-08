@@ -41,7 +41,7 @@ public class EmployeeStage {
 	private TableColumn<Employee, String> nameColumn;
 	private TableColumn<Employee, String> emailColumn;
 	private TableColumn<Employee, String> phoneColumn;
-	private TableColumn<Employee, Integer> departmentIDColumn;
+	private TableColumn<Employee, String> departmentIDColumn;
 	private TableColumn<Employee, String> jobTitleColumn;
 	private TableColumn<Employee, Double> salaryColumn;
 	private TableColumn<Employee, Integer> ageColumn;
@@ -67,14 +67,21 @@ public class EmployeeStage {
 		nameColumn = employeeTableView.createStyledColumn("Name", "name");
 		emailColumn = employeeTableView.createStyledColumn("Email", "email");
 		phoneColumn = employeeTableView.createStyledColumn("Phone Number", "phone");
-		departmentIDColumn = employeeTableView.createStyledColumn("Department ID", "departmentId", Integer.class);
+		departmentIDColumn = employeeTableView.createStyledColumn("Department ID", "departmentId");
+		departmentIDColumn.setCellValueFactory(e->{
+			Employee e1 = e.getValue();
+			int deptId = e1.getDepartmentId();
+			if (deptId == -1) return new SimpleStringProperty("Unassigned");
+			else return new SimpleStringProperty(deptId+"");
+		});
 		jobTitleColumn = employeeTableView.createStyledColumn("Job Title", "jobTitle");
 		salaryColumn = employeeTableView.createStyledColumn("Salary", "salary", Double.class);
 		ageColumn = employeeTableView.createStyledColumn("Age", "age", Integer.class);
 		joinedAtColumn = employeeTableView.createStyledColumn("Joined Date", "name");
-		joinedAtColumn.setCellValueFactory(e->{
-			Calendar c= e.getValue().getJoinedAt();
-			return new SimpleStringProperty(c.get(Calendar.DAY_OF_MONTH) + "/" +( c.get(Calendar.MONTH) + 1) + "/" + c.get(Calendar.YEAR));
+		joinedAtColumn.setCellValueFactory(e -> {
+			Calendar c = e.getValue().getJoinedAt();
+			return new SimpleStringProperty(
+					c.get(Calendar.DAY_OF_MONTH) + "/" + (c.get(Calendar.MONTH) + 1) + "/" + c.get(Calendar.YEAR));
 		});
 		employeeTableView.getColumns().addAll(employeeIDColumn, nameColumn, emailColumn, phoneColumn,
 				departmentIDColumn, jobTitleColumn, salaryColumn, ageColumn, joinedAtColumn);
@@ -87,20 +94,22 @@ public class EmployeeStage {
 		searchLTF.getChildren().addAll(searchL, searchTF);
 		searchLTF.setAlignment(Pos.CENTER);
 
-		searchTF.setOnKeyTyped(e->{
+		searchTF.setOnKeyTyped(e -> {
 			String searchS = searchTF.getText();
 			if (searchS == null || searchS.isEmpty()) {
 				employeeTableView.setItems(Main.employees);
 				return;
 			}
 			ObservableList<Employee> temp = FXCollections.observableArrayList();
-			for (int i = 0  ;i < Main.employees.size(); i++) {
+			for (int i = 0; i < Main.employees.size(); i++) {
 				if (Main.employees.get(i).getName().toLowerCase().startsWith(searchS.toLowerCase()))
 					temp.add(Main.employees.get(i));
 			}
-			if (temp.size() == 0) employeeTableView.setItems(Main.employees);
-			else employeeTableView.setItems(temp);
-			}); 
+			if (temp.size() == 0)
+				employeeTableView.setItems(Main.employees);
+			else
+				employeeTableView.setItems(temp);
+		});
 		buttons = new HBox(10);
 		buttons.getChildren().addAll(addEmpB, updateEmpB, deleteEmpB);
 		buttons.setAlignment(Pos.CENTER);
@@ -187,25 +196,25 @@ public class EmployeeStage {
 
 				int departmentId = -1;
 				if (!departmentIdS.equalsIgnoreCase("null")) {
-				try {
-					departmentId = Integer.parseInt(departmentIdS);
-				} catch (Exception ex) {
-					Main.notValidAlert("Invalid Input", "Department ID must be a number!");
-					return;
-				}
-
-				boolean isExist = false;
-				for (int i = 0; i < Main.departments.size(); i++) {
-					if (Main.departments.get(i).getDeptId() == departmentId) {
-						isExist = true;
-						break;
+					try {
+						departmentId = Integer.parseInt(departmentIdS);
+					} catch (Exception ex) {
+						Main.notValidAlert("Invalid Input", "Department ID must be a number!");
+						return;
 					}
-				}
 
-				if (!isExist) {
-					Main.notValidAlert("Invalid Input", "Department ID does not exist!");
-					return;
-				}
+					boolean isExist = false;
+					for (int i = 0; i < Main.departments.size(); i++) {
+						if (Main.departments.get(i).getDeptId() == departmentId) {
+							isExist = true;
+							break;
+						}
+					}
+
+					if (!isExist) {
+						Main.notValidAlert("Invalid Input", "Department ID does not exist!");
+						return;
+					}
 				}
 				String jobTitle = jobTitleTF.getText();
 				if (jobTitle == null || jobTitle.isEmpty()) {
@@ -312,9 +321,9 @@ public class EmployeeStage {
 			emailTF.setText(selectedEmployee.getEmail());
 			phoneTF.setText(selectedEmployee.getPhone());
 			if (selectedEmployee.getDepartmentId() != 1)
-			departmentIDTF.setText(selectedEmployee.getDepartmentId() + "");
-			else 
-			departmentIDTF.setText("null");
+				departmentIDTF.setText(selectedEmployee.getDepartmentId() + "");
+			else
+				departmentIDTF.setText("null");
 			jobTitleTF.setText(selectedEmployee.getJobTitle());
 			salaryTF.setText(selectedEmployee.getSalary() + "");
 			ageTF.setText(selectedEmployee.getAge() + "");
@@ -374,25 +383,25 @@ public class EmployeeStage {
 
 				int departmentId = -1;
 				if (!departmentIdS.equalsIgnoreCase("null")) {
-				try {
-					departmentId = Integer.parseInt(departmentIdS);
-				} catch (Exception ex) {
-					Main.notValidAlert("Invalid Input", "Department ID must be a number!");
-					return;
-				}
-
-				boolean isExist = false;
-				for (int i = 0; i < Main.departments.size(); i++) {
-					if (Main.departments.get(i).getDeptId() == departmentId) {
-						isExist = true;
-						break;
+					try {
+						departmentId = Integer.parseInt(departmentIdS);
+					} catch (Exception ex) {
+						Main.notValidAlert("Invalid Input", "Department ID must be a number!");
+						return;
 					}
-				}
 
-				if (!isExist) {
-					Main.notValidAlert("Invalid Input", "Department ID does not exist!");
-					return;
-				}
+					boolean isExist = false;
+					for (int i = 0; i < Main.departments.size(); i++) {
+						if (Main.departments.get(i).getDeptId() == departmentId) {
+							isExist = true;
+							break;
+						}
+					}
+
+					if (!isExist) {
+						Main.notValidAlert("Invalid Input", "Department ID does not exist!");
+						return;
+					}
 				}
 
 				String jobTitle = jobTitleTF.getText();
@@ -581,11 +590,11 @@ public class EmployeeStage {
 		this.phoneColumn = phoneColumn;
 	}
 
-	public TableColumn<Employee, Integer> getDepartmentIDColumn() {
+	public TableColumn<Employee, String> getDepartmentIDColumn() {
 		return departmentIDColumn;
 	}
 
-	public void setDepartmentIDColumn(TableColumn<Employee, Integer> departmentIDColumn) {
+	public void setDepartmentIDColumn(TableColumn<Employee, String> departmentIDColumn) {
 		this.departmentIDColumn = departmentIDColumn;
 	}
 

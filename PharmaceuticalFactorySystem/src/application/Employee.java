@@ -84,6 +84,10 @@ public class Employee {
 			stmt.setString(1, newName);
 			stmt.setString(2, newEmail);
 			stmt.setString(3, newPhone);
+			if (newDepartmentId == -1) {
+				stmt.setNull(4, Types.INTEGER);
+			}
+			else
 			stmt.setInt(4, newDepartmentId);
 			stmt.setString(5, newJobTitle);
 			stmt.setDouble(6, newSalary);

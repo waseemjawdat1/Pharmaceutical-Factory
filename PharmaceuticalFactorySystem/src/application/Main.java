@@ -168,6 +168,8 @@ public class Main extends Application {
 				String email = rs.getString("email");
 				String phone = rs.getString("phone");
 				int deptId = rs.getInt("department_id");
+				if (rs.wasNull())
+					deptId = -1;
 				String title = rs.getString("job_title");
 				double salary = rs.getDouble("salary");
 				int age = rs.getInt("age");
