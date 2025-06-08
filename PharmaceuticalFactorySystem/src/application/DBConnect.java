@@ -3,9 +3,9 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 
 public class DBConnect {
-    private static final String url = "jdbc:mysql://sql12.freesqldatabase.com:3306/sql12783511";
-    private static final String name = "sql12783511";
-    private static final String password = "que55X2Yg4";
+    private static final String url = "jdbc:mysql://62.84.184.87:3306/pharmaceuticalfactory";
+    private static final String name = "admin";
+    private static final String password = "admin";
 
     public DBConnect() {
     }
