@@ -26,8 +26,7 @@ public class Main extends Application {
 
 	@Override
 	public void start(Stage primaryStage) {
-		try {
-			
+		try {			
 		        if (conn != null) {
 		            System.out.println("Connected!");
 		        } else {
