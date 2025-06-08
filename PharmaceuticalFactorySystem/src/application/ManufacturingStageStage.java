@@ -80,7 +80,7 @@ public class ManufacturingStageStage {
 		stage.show();
 
 		add.setOnAction(e -> {
-			Label title = new MyLabel("Add Manufacturing Stage", 1);
+			Label title = new MyLabel("Add Stage", 1);
 			Label nameL = new MyLabel("Stage Name : ");
 			TextField nameTF = new MyTextField();
 
@@ -199,6 +199,11 @@ public class ManufacturingStageStage {
 			removeAlert.setContentText("Are you sure to remove stage with id " + selected.getStageId() + " ?");
 			ButtonType res = removeAlert.showAndWait().orElse(ButtonType.CANCEL);
 			if (res == ButtonType.OK) {
+				for (int i =0 ;i < Main.employeeStageAssignments.size(); i++) {
+					if (Main.employeeStageAssignments.get(i).getStageId() == selected.getStageId()) {
+						Main.employeeStageAssignments.remove(i);
+					}
+				}
 				Main.manufacturingStages.remove(selected);
 				String sql = "DELETE FROM manufacturing_stages WHERE stage_id = ?";
 				try (PreparedStatement stmt = Main.conn.prepareStatement(sql)) {

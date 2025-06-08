@@ -33,9 +33,7 @@ public class Main extends Application {
 	static ObservableList <Warehouse> warehouses=  FXCollections.observableArrayList();
 	static ObservableList <Product> products=  FXCollections.observableArrayList();
 	static ObservableList <ManufacturingStage> manufacturingStages=  FXCollections.observableArrayList();
-
-		
-
+	static ObservableList <EmployeeStageAssignment> employeeStageAssignments=  FXCollections.observableArrayList();
 
 	@Override
 	public void start(Stage primaryStage) {
@@ -46,8 +44,8 @@ public class Main extends Application {
 		            System.out.println("X");
 		        }
 		     
-		        Timeline autoReload = new Timeline(
-		        	    new KeyFrame(Duration.seconds(3), e -> {
+		    //    Timeline autoReload = new Timeline(
+		      //  	    new KeyFrame(Duration.seconds(3), e -> {
 		        	        Main.loadUsers();
 		        	        Main.loadDepartments();
 		        	        Main.loadSuppliers();
@@ -57,10 +55,11 @@ public class Main extends Application {
 		        	        loadWarehouses();
 		        	        loadProducts();
 		        	        loadManufacturingStages();
-		        	    })
-		        	);
-		        	autoReload.setCycleCount(Timeline.INDEFINITE);
-		        	autoReload.play();
+		        	        loadEmployeeStageAssignments();
+		     //   	    })
+		     //   	);
+		     //   	autoReload.setCycleCount(Timeline.INDEFINITE);
+		     //   	autoReload.play();
 
 			new LoginScene().getLoginStage().show();
 		} catch(Exception e) {
@@ -312,6 +311,28 @@ public class Main extends Application {
 	    }
 	}
 
+	public static void loadEmployeeStageAssignments() {
+	    Main.employeeStageAssignments.clear();
+	    String sql = "SELECT * FROM employee_stage_assignments";
+
+	    try (PreparedStatement stmt = Main.conn.prepareStatement(sql);
+	         ResultSet rs = stmt.executeQuery()) {
+
+	        while (rs.next()) {
+	            int empId = rs.getInt("employee_id");
+	            int stageId = rs.getInt("stage_id");
+
+	            EmployeeStageAssignment a = new EmployeeStageAssignment(empId, stageId);
+	            Main.employeeStageAssignments.add(a);
+	        }
+
+	        if (EmployeeStageAssignmentStage.assignmentTable != null)
+	            EmployeeStageAssignmentStage.assignmentTable.setItems(Main.employeeStageAssignments);
+
+	    } catch (SQLException e) {
+	        Main.notValidAlert("Database Error", e.getMessage());
+	    }
+	}
 
 
 

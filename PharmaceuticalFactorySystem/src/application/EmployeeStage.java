@@ -497,6 +497,11 @@ public class EmployeeStage {
 			if (res == ButtonType.OK) {
 				Main.employees.remove(selectedEmployee);
 				String removeEmpSql = "DELETE FROM employees where employee_id = ?";
+				for (int i =0 ;i < Main.employeeStageAssignments.size(); i++) {
+					if (Main.employeeStageAssignments.get(i).getEmployeeId() == selectedEmployee.getEmployeeId()) {
+						Main.employeeStageAssignments.remove(i);
+					}
+				}
 				try (PreparedStatement stmt = Main.conn.prepareStatement(removeEmpSql)) {
 					stmt.setInt(1, selectedEmployee.getEmployeeId());
 					stmt.executeUpdate();
