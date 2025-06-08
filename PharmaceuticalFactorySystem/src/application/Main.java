@@ -22,6 +22,8 @@ public class Main extends Application {
 	static ObservableList <User> users=  FXCollections.observableArrayList();
 	static ObservableList <Employee> employees=  FXCollections.observableArrayList();
 	static ObservableList <Department> departments=  FXCollections.observableArrayList();
+	static ObservableList <Supplier> suppliers=  FXCollections.observableArrayList();
+	static ObservableList <RawMaterial> materials=  FXCollections.observableArrayList();
 
 
 	@Override
@@ -35,6 +37,9 @@ public class Main extends Application {
 		     
 		        loadUsers();
 		        loadDepartments();
+		        loadSuppliers();
+		        loadMaterials();
+		        
 			new LoginScene().getLoginStage().show();
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -45,7 +50,7 @@ public class Main extends Application {
 		launch(args);
 	}
 	
-	public void loadUsers() {
+	public static void loadUsers() {
 	    Main.users.clear(); 
 
 	    String loadAllUsers = "SELECT * FROM users";
@@ -70,7 +75,7 @@ public class Main extends Application {
 	        Main.notValidAlert("Database Error", e.getMessage());
 	    }
 	}
-	public void loadDepartments() {
+	public static void loadDepartments() {
 	    Main.departments.clear(); 
 
 	    String loadAllUsers = "SELECT * FROM departments";
@@ -95,7 +100,60 @@ public class Main extends Application {
 	        Main.notValidAlert("Database Error", e.getMessage());
 	    }
 	}
-	
+	public static void loadSuppliers() {
+	    Main.suppliers.clear();
+
+	    String sql = "SELECT * FROM suppliers";
+
+	    try (PreparedStatement stmt = Main.conn.prepareStatement(sql);
+	         ResultSet rs = stmt.executeQuery()) {
+
+	        while (rs.next()) {
+	            int id = rs.getInt("supplier_id");
+	            String name = rs.getString("name");
+	            String email = rs.getString("email");
+	            String address = rs.getString("address");
+	            String phone = rs.getString("phone");
+
+	            Supplier s = new Supplier(id, name,email, phone, address);
+	            Main.suppliers.add(s);
+	        }
+
+	        if (SupplierStage.supplierTable != null)
+	            SupplierStage.supplierTable.setItems(Main.suppliers);
+
+	    } catch (SQLException e) {
+	        Main.notValidAlert("Database Error", e.getMessage());
+	    }
+	}
+	public static void loadMaterials() {
+		Main.materials.clear();
+
+		String sql = "SELECT * FROM raw_materials";
+
+		try (PreparedStatement stmt = Main.conn.prepareStatement(sql);
+		     ResultSet rs = stmt.executeQuery()) {
+
+			while (rs.next()) {
+				int id = rs.getInt("material_id");
+				String name = rs.getString("name");
+				int unit = rs.getInt("unit");
+				int supplierId = rs.getInt("supplier_id");
+				if (rs.wasNull())
+					supplierId = -1;
+
+				RawMaterial r = new RawMaterial(id, name, unit, supplierId);
+				Main.materials.add(r);
+			}
+			if (RawMaterialStage.materialTable != null)
+				RawMaterialStage.materialTable.setItems(Main.materials);
+
+		} catch (SQLException e) {
+			Main.notValidAlert("Database Error", e.getMessage());
+		}
+	}
+
+
 	
 	public static void validAlert (String title , String content) {
 		Alert v = new Alert (AlertType.INFORMATION);
