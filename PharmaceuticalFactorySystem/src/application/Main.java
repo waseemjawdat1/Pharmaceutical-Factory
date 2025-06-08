@@ -29,6 +29,7 @@ public class Main extends Application {
 	static ObservableList <Department> departments=  FXCollections.observableArrayList();
 	static ObservableList <Supplier> suppliers=  FXCollections.observableArrayList();
 	static ObservableList <RawMaterial> materials=  FXCollections.observableArrayList();
+	static ObservableList <Customer> customers=  FXCollections.observableArrayList();
 
 
 	@Override
@@ -47,6 +48,7 @@ public class Main extends Application {
 		        	        Main.loadSuppliers();
 		        	        Main.loadMaterials();
 		        	        Main.loadEmployees();
+		        	        loadCustomers();
 		        	    })
 		        	);
 		        	autoReload.setCycleCount(Timeline.INDEFINITE);
@@ -198,6 +200,32 @@ public class Main extends Application {
 		}
 	}
 
+	public static void loadCustomers() {
+	    Main.customers.clear();
+
+	    String sql = "SELECT * FROM customers";
+
+	    try (PreparedStatement stmt = Main.conn.prepareStatement(sql);
+	         ResultSet rs = stmt.executeQuery()) {
+
+	        while (rs.next()) {
+	            int id = rs.getInt("customer_id");
+	            String name = rs.getString("name");
+	            String email = rs.getString("email");
+	            String phone = rs.getString("phone");
+	            String address = rs.getString("address");
+
+	            Customer c = new Customer(id, name, email, phone, address);
+	            Main.customers.add(c);
+	        }
+
+	        if (CustomerStage.customerTable != null)
+	            CustomerStage.customerTable.setItems(Main.customers);
+
+	    } catch (SQLException e) {
+	        Main.notValidAlert("Database Error", e.getMessage());
+	    }
+	}
 
 
 	
