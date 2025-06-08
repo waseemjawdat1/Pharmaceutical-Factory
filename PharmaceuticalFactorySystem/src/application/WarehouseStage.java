@@ -234,6 +234,11 @@ public class WarehouseStage {
 			alert.setContentText("Are you sure to remove warehouse with id " + selected.getWarehouseId() + " ?");
 			ButtonType res = alert.showAndWait().orElse(ButtonType.CANCEL);
 			if (res == ButtonType.OK) {
+				for (int i =0; i< Main.products.size(); i++) {
+					if (Main.products.get(i).getWarehouseId() == selected.getWarehouseId()) {
+						selected.setWarehouseId(-1);
+					}
+				}
 				Main.warehouses.remove(selected);
 				String sql = "DELETE FROM warehouses WHERE warehouse_id = ?";
 				try (PreparedStatement stmt = Main.conn.prepareStatement(sql)) {

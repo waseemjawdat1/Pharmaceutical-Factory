@@ -31,6 +31,8 @@ public class Main extends Application {
 	static ObservableList <RawMaterial> materials=  FXCollections.observableArrayList();
 	static ObservableList <Customer> customers=  FXCollections.observableArrayList();
 	static ObservableList <Warehouse> warehouses=  FXCollections.observableArrayList();
+	static ObservableList <Product> products=  FXCollections.observableArrayList();
+
 
 
 	@Override
@@ -51,6 +53,7 @@ public class Main extends Application {
 		        	        Main.loadEmployees();
 		        	        loadCustomers();
 		        	        loadWarehouses();
+		        	        loadProducts();
 		        	    })
 		        	);
 		        	autoReload.setCycleCount(Timeline.INDEFINITE);
@@ -252,6 +255,37 @@ public class Main extends Application {
 	        Main.notValidAlert("Database Error", e.getMessage());
 	    }
 	}
+	public static void loadProducts() {
+	    Main.products.clear();
+
+	    String sql = "SELECT * FROM products";
+
+	    try (PreparedStatement stmt = Main.conn.prepareStatement(sql);
+	         ResultSet rs = stmt.executeQuery()) {
+
+	        while (rs.next()) {
+	            int id = rs.getInt("product_id");
+	            String name = rs.getString("name");
+	            String category = rs.getString("category");
+	            Date expiry = rs.getDate("expiry_date");
+	            int quantity = rs.getInt("quantity");
+	            int warehouseId = rs.getInt("warehouse_id");
+	            if (rs.wasNull())
+	                warehouseId = -1;
+	            Date created = rs.getDate("created_at");
+
+	            Product p = new Product(id, name, category, expiry, quantity, warehouseId, created);
+	            Main.products.add(p);
+	        }
+
+	        if (ProductStage.productTable != null)
+	            ProductStage.productTable.setItems(Main.products);
+
+	    } catch (SQLException e) {
+	        Main.notValidAlert("Database Error", e.getMessage());
+	    }
+	}
+
 
 
 
