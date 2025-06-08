@@ -21,7 +21,7 @@ public class Main extends Application {
 	static Connection conn = DBConnect.getConnection();
 	static ObservableList <User> users=  FXCollections.observableArrayList();
 	static ObservableList <Employee> employees=  FXCollections.observableArrayList();
-	static ObservableList <Department> depatments=  FXCollections.observableArrayList();
+	static ObservableList <Department> departments=  FXCollections.observableArrayList();
 
 
 	@Override
@@ -34,6 +34,7 @@ public class Main extends Application {
 		        }
 		     
 		        loadUsers();
+		        loadDepartments();
 			new LoginScene().getLoginStage().show();
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -64,6 +65,31 @@ public class Main extends Application {
 	        }
 	        if (UserStage.userTable != null)
 	        UserStage.userTable.setItems(users);
+
+	    } catch (SQLException e) {
+	        Main.notValidAlert("Database Error", e.getMessage());
+	    }
+	}
+	public void loadDepartments() {
+	    Main.departments.clear(); 
+
+	    String loadAllUsers = "SELECT * FROM departments";
+
+	    try (PreparedStatement stmt = Main.conn.prepareStatement(loadAllUsers);
+	         ResultSet rs = stmt.executeQuery()) {
+
+	        while (rs.next()) {
+	            int id = rs.getInt("department_id");
+	            String name = rs.getString("name");
+	            int manager_id = rs.getInt("manager_id");
+	            if (rs.wasNull()) {
+	            	manager_id = -1;
+	            }
+	            Department d = new Department(id, name, manager_id);
+	            departments.add(d);
+	        }
+	        if (DepartmentStage.deptTable != null)
+	        	DepartmentStage.deptTable.setItems(departments);
 
 	    } catch (SQLException e) {
 	        Main.notValidAlert("Database Error", e.getMessage());

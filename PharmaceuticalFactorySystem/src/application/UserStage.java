@@ -298,7 +298,7 @@ public UserStage () {
 	all = new VBox (10 , searchBox , buttons , userTable);
 	all.setAlignment(Pos.CENTER);
 	
-	Scene scene = new Scene (all , 800 , 800);
+	Scene scene = new Scene (all , 800 , 700);
     scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 
 	Stage stage = new Stage ();

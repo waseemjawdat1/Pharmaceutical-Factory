@@ -52,8 +52,6 @@ public class MyButton extends Button {
         setStyleImageButton();
     }
 
-    // Helpers
-
     private void setGraphicSize(int w, int h) {
         ImageView icon = (ImageView) getGraphic();
         icon.setFitWidth(w);

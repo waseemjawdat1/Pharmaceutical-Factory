@@ -4,6 +4,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 
 import com.mysql.cj.xdevapi.PreparableStatement;
 
@@ -18,14 +19,18 @@ public Department (int deptId , String deptName , int managerId) {
 	this.managerId = managerId;
 }
 
-public Department (String deptName , int managerId) {
+public Department (String deptName , int managerId) throws SQLException {
 	this.deptName = deptName;
 	this.managerId = managerId;
+	addDeptToDB();
 }
 public void addDeptToDB() throws SQLException {
 	String addDept = "INSERT INTO departments (name , manager_id) VALUES (? , ?)";
 	try (PreparedStatement stmt = Main.conn.prepareStatement(addDept)){
 		stmt.setString(1, deptName);
+		if (managerId == -1)
+			stmt.setNull(2, Types.INTEGER);
+		else
 		stmt.setInt(2, managerId);
 		stmt.executeUpdate();
 		this.deptId = getLastId();
@@ -35,6 +40,9 @@ public void updateDepartment (String newName , int newManager) throws SQLExcepti
 	String update = "Update departments SET name = ?, manager_id = ? WHERE department_id = ?";
 	try (PreparedStatement stmt = Main.conn.prepareStatement(update)){
 		stmt.setString(1, newName);
+		if (newManager == -1)
+			stmt.setNull(2, Types.INTEGER);
+		else
 		stmt.setInt(2, newManager);
 		stmt.setInt(3, deptId);
 		stmt.executeUpdate();
