@@ -7,6 +7,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Calendar;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -37,11 +40,18 @@ public class Main extends Application {
 		            System.out.println("X");
 		        }
 		     
-		        loadUsers();
-		        loadDepartments();
-		        loadSuppliers();
-		        loadMaterials();
-		        loadEmployees();
+		        Timeline autoReload = new Timeline(
+		        	    new KeyFrame(Duration.seconds(3), e -> {
+		        	        Main.loadUsers();
+		        	        Main.loadDepartments();
+		        	        Main.loadSuppliers();
+		        	        Main.loadMaterials();
+		        	        Main.loadEmployees();
+		        	    })
+		        	);
+		        	autoReload.setCycleCount(Timeline.INDEFINITE);
+		        	autoReload.play();
+
 			new LoginScene().getLoginStage().show();
 		} catch(Exception e) {
 			e.printStackTrace();
