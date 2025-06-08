@@ -1,9 +1,11 @@
 package application;
 	
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Calendar;
 
 import javafx.application.Application;
 import javafx.collections.FXCollections;
@@ -39,7 +41,7 @@ public class Main extends Application {
 		        loadDepartments();
 		        loadSuppliers();
 		        loadMaterials();
-		        
+		        loadEmployees();
 			new LoginScene().getLoginStage().show();
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -152,6 +154,38 @@ public class Main extends Application {
 			Main.notValidAlert("Database Error", e.getMessage());
 		}
 	}
+	public static void loadEmployees() {
+		Main.employees.clear();
+
+		String sql = "SELECT * FROM employees";
+
+		try (PreparedStatement stmt = Main.conn.prepareStatement(sql);
+		     ResultSet rs = stmt.executeQuery()) {
+
+			while (rs.next()) {
+				int id = rs.getInt("employee_id");
+				String name = rs.getString("name");
+				String email = rs.getString("email");
+				String phone = rs.getString("phone");
+				int deptId = rs.getInt("department_id");
+				String title = rs.getString("job_title");
+				double salary = rs.getDouble("salary");
+				int age = rs.getInt("age");
+				Date joinedAt = rs.getDate("joined_at");
+				Calendar joinedCalendar = Calendar.getInstance();
+				joinedCalendar.setTime(joinedAt);
+				Employee e = new Employee(id, name, email, phone, deptId, title, salary, age, joinedCalendar);
+				Main.employees.add(e);
+			}
+
+			if (EmployeeStage.employeeTableView != null)
+				EmployeeStage.employeeTableView.setItems(Main.employees);
+
+		} catch (SQLException e) {
+			Main.notValidAlert("Database Error", e.getMessage());
+		}
+	}
+
 
 
 	

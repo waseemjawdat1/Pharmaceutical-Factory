@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.Calendar;
 
 public class Employee {
@@ -15,11 +16,11 @@ public class Employee {
 	private int departmentId;
 	private String jobTitle;
 	private double salary;
-	private int yearHired;
+	private int age;
 	private Calendar joinedAt;
 
 	public Employee(int employeeId, String name, String email, String phone, int departmentId, String jobTitle,
-			double salary, int yearHired, Calendar joinedAt) {
+			double salary, int age, Calendar joinedAt) {
 		this.employeeId = employeeId;
 		this.name = name;
 		this.email = email;
@@ -27,34 +28,38 @@ public class Employee {
 		this.departmentId = departmentId;
 		this.jobTitle = jobTitle;
 		this.salary = salary;
-		this.yearHired = yearHired;
+		this.age = age;
 		this.joinedAt = joinedAt;
 	}
 
 	public Employee(String name, String email, String phone, int departmentId, String jobTitle, double salary,
-			int yearHired, Calendar joinedAt) throws SQLException {
+			int age, Calendar joinedAt) throws SQLException {
 		this.name = name;
 		this.email = email;
 		this.phone = phone;
 		this.departmentId = departmentId;
 		this.jobTitle = jobTitle;
 		this.salary = salary;
-		this.yearHired = yearHired;
+		this.age = age;
 		this.joinedAt = joinedAt;
 		addEmpToDB();
 	}
 
 	public void addEmpToDB() throws SQLException {
-		String addEmp = "INSERT INTO employees (name , email , phone , department_id , job_title , salary , year_hired , joined_at) VALUES (? , ? , ? , ? , ? , ? , ? , ?)";
+		String addEmp = "INSERT INTO employees (name , email , phone , department_id , job_title , salary , age , joined_at) VALUES (? , ? , ? , ? , ? , ? , ? , ?)";
 		Date date = new Date(joinedAt.getTimeInMillis());
 		try (PreparedStatement stmt = Main.conn.prepareStatement(addEmp)) {
 			stmt.setString(1, name);
 			stmt.setString(2, email);
 			stmt.setString(3, phone);
+			if (departmentId == -1) {
+				stmt.setNull(4, Types.INTEGER);
+			}
+			else
 			stmt.setInt(4, departmentId);
 			stmt.setString(5, jobTitle);
 			stmt.setDouble(6, salary);
-			stmt.setInt(7, yearHired);
+			stmt.setInt(7, age);
 			stmt.setDate(8, date);
 			stmt.executeUpdate();
 			this.employeeId = getLastId();
@@ -72,8 +77,8 @@ public class Employee {
 	}
 
 	public void updateEmployee(String newName, String newEmail, String newPhone, int newDepartmentId,
-			String newJobTitle, double newSalary, int newYearHired, Calendar newJoinedAt) throws SQLException {
-		String updateEmp = "Update employees SET name = ?, email = ?, phone = ?, department_id = ?, job_title = ?, salary = ?, year_hired = ?, joined_at = ? WHERE employee_id = ?";
+			String newJobTitle, double newSalary, int newAge, Calendar newJoinedAt) throws SQLException {
+		String updateEmp = "Update employees SET name = ?, email = ?, phone = ?, department_id = ?, job_title = ?, salary = ?, age = ?, joined_at = ? WHERE employee_id = ?";
 		Date date = new Date(newJoinedAt.getTimeInMillis());
 		try (PreparedStatement stmt = Main.conn.prepareStatement(updateEmp)) {
 			stmt.setString(1, newName);
@@ -82,7 +87,7 @@ public class Employee {
 			stmt.setInt(4, newDepartmentId);
 			stmt.setString(5, newJobTitle);
 			stmt.setDouble(6, newSalary);
-			stmt.setInt(7, newYearHired);
+			stmt.setInt(7, newAge);
 			stmt.setDate(8, date);
 			stmt.setInt(9, employeeId);
 			stmt.executeUpdate();
@@ -92,7 +97,7 @@ public class Employee {
 			this.departmentId = newDepartmentId;
 			this.jobTitle = newJobTitle;
 			this.salary = newSalary;
-			this.yearHired = newYearHired;
+			this.age = newAge;
 			this.joinedAt = newJoinedAt;
 		}
 	}
@@ -153,12 +158,12 @@ public class Employee {
 		this.salary = salary;
 	}
 
-	public int getYearHired() {
-		return yearHired;
+	public int getAge() {
+		return age;
 	}
 
-	public void setYearHired(int yearHired) {
-		this.yearHired = yearHired;
+	public void setAge(int age) {
+		this.age = age;
 	}
 
 	public Calendar getJoinedAt() {

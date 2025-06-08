@@ -263,7 +263,8 @@ public class LoginScene {
                 String name = r.getString("username");
                 String role = r.getString("role");
                 showModernAlert(true, "Welcome " + name, "Logged in as " + role);
-                new UserStage();
+              //  new UserStage();
+                new EmployeeStage();
             } else {
                 showModernAlert(false, "Login Failed", "Invalid username or password");
             }
