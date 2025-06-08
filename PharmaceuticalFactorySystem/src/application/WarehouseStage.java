@@ -236,7 +236,7 @@ public class WarehouseStage {
 			if (res == ButtonType.OK) {
 				for (int i =0; i< Main.products.size(); i++) {
 					if (Main.products.get(i).getWarehouseId() == selected.getWarehouseId()) {
-						selected.setWarehouseId(-1);
+						Main.products.get(i).setWarehouseId(-1);
 					}
 				}
 				Main.warehouses.remove(selected);

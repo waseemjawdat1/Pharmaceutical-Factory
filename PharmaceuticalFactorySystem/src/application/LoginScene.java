@@ -264,7 +264,7 @@ public class LoginScene {
                 String role = r.getString("role");
                 showModernAlert(true, "Welcome " + name, "Logged in as " + role);
               //  new UserStage();
-               new ProductStage();
+               new WarehouseStage();
             } else {
                 showModernAlert(false, "Login Failed", "Invalid username or password");
             }

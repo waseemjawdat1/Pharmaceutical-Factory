@@ -32,7 +32,9 @@ public class Main extends Application {
 	static ObservableList <Customer> customers=  FXCollections.observableArrayList();
 	static ObservableList <Warehouse> warehouses=  FXCollections.observableArrayList();
 	static ObservableList <Product> products=  FXCollections.observableArrayList();
+	static ObservableList <ManufacturingStage> manufacturingStages=  FXCollections.observableArrayList();
 
+		
 
 
 	@Override
@@ -54,6 +56,7 @@ public class Main extends Application {
 		        	        loadCustomers();
 		        	        loadWarehouses();
 		        	        loadProducts();
+		        	        loadManufacturingStages();
 		        	    })
 		        	);
 		        	autoReload.setCycleCount(Timeline.INDEFINITE);
@@ -285,6 +288,30 @@ public class Main extends Application {
 	        Main.notValidAlert("Database Error", e.getMessage());
 	    }
 	}
+	public static void loadManufacturingStages() {
+	    Main.manufacturingStages.clear();
+	    
+	    String sql = "SELECT * FROM manufacturing_stages";
+
+	    try (PreparedStatement stmt = Main.conn.prepareStatement(sql);
+	         ResultSet rs = stmt.executeQuery()) {
+
+	        while (rs.next()) {
+	            int id = rs.getInt("stage_id");
+	            String name = rs.getString("name");
+
+	            ManufacturingStage m = new ManufacturingStage(id, name);
+	            Main.manufacturingStages.add(m);
+	        }
+
+	        if (ManufacturingStageStage.stageTable != null)
+	            ManufacturingStageStage.stageTable.setItems(Main.manufacturingStages);
+
+	    } catch (SQLException e) {
+	        Main.notValidAlert("Database Error", e.getMessage());
+	    }
+	}
+
 
 
 
