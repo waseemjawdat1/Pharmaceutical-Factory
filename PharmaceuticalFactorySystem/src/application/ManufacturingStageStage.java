@@ -5,6 +5,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -36,7 +38,31 @@ public class ManufacturingStageStage {
 		stageTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 		stageTable.setMinHeight(500);
 		stageTable.setMaxWidth(600);
+		TextField searchTF = new MyTextField();
+		Label searchL = new MyLabel("Search Name");
+		HBox searchBox = new HBox(10, searchL, searchTF);
+		searchBox.setAlignment(Pos.CENTER);
+		
+		searchTF.setOnKeyTyped(e -> {
+		    String search = searchTF.getText().trim();
+		    if (search.isEmpty()) {
+		        stageTable.setItems(Main.manufacturingStages);
+		    } else {
+		        ObservableList<ManufacturingStage> temp = FXCollections.observableArrayList();
+		        for (int i = 0; i < Main.manufacturingStages.size(); i++) {
+		            if (Main.manufacturingStages.get(i).getName().toLowerCase().contains(search.toLowerCase())) {
+		                temp.add(Main.manufacturingStages.get(i));
+		            }
+		        }
+		        if (temp.size() > 0)
+		            stageTable.setItems(temp);
+		        else
+		            stageTable.setItems(Main.manufacturingStages);
+		    }
+		});
 
+		
+		
 		add = new MyButton("➕ Add", 2);
 		update = new MyButton("✎ Edit", 2);
 		remove = new MyButton("➖ Remove", 2);
@@ -44,7 +70,7 @@ public class ManufacturingStageStage {
 		HBox buttons = new HBox(10, add, update, remove);
 		buttons.setAlignment(Pos.CENTER);
 
-		VBox all = new VBox(10, buttons, stageTable);
+		VBox all = new VBox(10,searchBox, buttons, stageTable);
 		all.setAlignment(Pos.CENTER);
 		Scene scene = new Scene(all, 700, 650);
 		scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
