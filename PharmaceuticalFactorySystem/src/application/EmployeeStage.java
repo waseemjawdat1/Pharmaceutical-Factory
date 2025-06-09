@@ -69,11 +69,13 @@ public class EmployeeStage {
 		emailColumn = employeeTableView.createStyledColumn("Email", "email");
 		phoneColumn = employeeTableView.createStyledColumn("Phone Number", "phone");
 		departmentIDColumn = employeeTableView.createStyledColumn("Department ID", "departmentId");
-		departmentIDColumn.setCellValueFactory(e->{
+		departmentIDColumn.setCellValueFactory(e -> {
 			Employee e1 = e.getValue();
 			int deptId = e1.getDepartmentId();
-			if (deptId == -1) return new SimpleStringProperty("Unassigned");
-			else return new SimpleStringProperty(deptId+"");
+			if (deptId == -1)
+				return new SimpleStringProperty("Unassigned");
+			else
+				return new SimpleStringProperty(deptId + "");
 		});
 		jobTitleColumn = employeeTableView.createStyledColumn("Job Title", "jobTitle");
 		salaryColumn = employeeTableView.createStyledColumn("Salary", "salary", Double.class);
@@ -183,10 +185,25 @@ public class EmployeeStage {
 					return;
 				}
 
+				for (int i = 0; i < Main.employees.size(); i++) {
+					if (Main.employees.get(i).getEmail().equals(email)) {
+						Main.notValidAlert("Invalid input", "This email already exists, please enter another email!");
+						return;
+					}
+				}
+
 				String phone = phoneTF.getText();
 				if (phone == null || phone.isEmpty()) {
 					Main.notValidAlert("Invalid Input", "Phone field is empty!");
 					return;
+				}
+
+				for (int i = 0; i < Main.employees.size(); i++) {
+					if (Main.employees.get(i).getPhone().equals(phone)) {
+						Main.notValidAlert("Invalid input",
+								"This phone number already exists, please enter another phone number!");
+						return;
+					}
 				}
 
 				String departmentIdS = departmentTF.getText();
@@ -370,10 +387,25 @@ public class EmployeeStage {
 					return;
 				}
 
+				for (int i = 0; i < Main.employees.size(); i++) {
+					if (Main.employees.get(i).getEmail().equals(email)) {
+						Main.notValidAlert("Invalid input", "This email already exists, please enter another email!");
+						return;
+					}
+				}
+
 				String phone = phoneTF.getText();
 				if (phone == null || phone.isEmpty()) {
 					Main.notValidAlert("Invalid Input", "Phone field is empty!");
 					return;
+				}
+
+				for (int i = 0; i < Main.employees.size(); i++) {
+					if (Main.employees.get(i).getPhone().equals(phone)) {
+						Main.notValidAlert("Invalid input",
+								"This phone number already exists, please enter another phone number!");
+						return;
+					}
 				}
 
 				String departmentIdS = departmentIDTF.getText();
@@ -497,8 +529,8 @@ public class EmployeeStage {
 			ButtonType res = remove.showAndWait().orElse(ButtonType.CANCEL);
 			if (res == ButtonType.OK) {
 				Main.employees.remove(selectedEmployee);
-				String removeEmpSql ="UPDATE employees SET active = FALSE WHERE employee_id = ?";
-			
+				String removeEmpSql = "UPDATE employees SET active = FALSE WHERE employee_id = ?";
+
 				try (PreparedStatement stmt = Main.conn.prepareStatement(removeEmpSql)) {
 					stmt.setInt(1, selectedEmployee.getEmployeeId());
 					stmt.executeUpdate();
@@ -512,33 +544,34 @@ public class EmployeeStage {
 			}
 		});
 	}
+
 	public void deleteUsersAndAssignments(int employeeId) throws SQLException {
-	    String deleteUsers = "DELETE FROM users WHERE employee_id = ?";
-	    String deleteAssignments = "DELETE FROM employee_stage_assignments WHERE employee_id = ?";
+		String deleteUsers = "DELETE FROM users WHERE employee_id = ?";
+		String deleteAssignments = "DELETE FROM employee_stage_assignments WHERE employee_id = ?";
 
-	
-	        try (PreparedStatement stmt1 = Main.conn.prepareStatement(deleteUsers);
-	             PreparedStatement stmt2 = Main.conn.prepareStatement(deleteAssignments)) {
+		try (PreparedStatement stmt1 = Main.conn.prepareStatement(deleteUsers);
+				PreparedStatement stmt2 = Main.conn.prepareStatement(deleteAssignments)) {
 
-	            stmt1.setInt(1, employeeId);
-	            stmt1.executeUpdate();
+			stmt1.setInt(1, employeeId);
+			stmt1.executeUpdate();
 
-	            stmt2.setInt(1, employeeId);
-	            stmt2.executeUpdate();
-	        }
-	    	for (int i = 0; i < Main.users.size(); i++) {
-				if (Main.users.get(i).getEmployeeId() == employeeId) {
-					Main.users.remove(i);
-				}
+			stmt2.setInt(1, employeeId);
+			stmt2.executeUpdate();
+		}
+		for (int i = 0; i < Main.users.size(); i++) {
+			if (Main.users.get(i).getEmployeeId() == employeeId) {
+				Main.users.remove(i);
 			}
-			
-			for (int i =0 ;i < Main.employeeStageAssignments.size(); i++) {
-				if (Main.employeeStageAssignments.get(i).getEmployeeId() == employeeId) {
-					Main.employeeStageAssignments.remove(i);
-				}
+		}
+
+		for (int i = 0; i < Main.employeeStageAssignments.size(); i++) {
+			if (Main.employeeStageAssignments.get(i).getEmployeeId() == employeeId) {
+				Main.employeeStageAssignments.remove(i);
 			}
-	  
+		}
+
 	}
+
 	public Label getSearchL() {
 		return searchL;
 	}

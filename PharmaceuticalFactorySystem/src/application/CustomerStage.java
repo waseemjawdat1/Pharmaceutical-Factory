@@ -41,13 +41,13 @@ public class CustomerStage {
 		customerTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 		customerTable.setMinHeight(500);
 		customerTable.setMaxWidth(900);
-		
+
 		Label searchL = new MyLabel("Search Name");
 		TextField searchTF = new MyTextField();
-		
+
 		HBox searchBox = new HBox(10, searchL, searchTF);
 		searchBox.setAlignment(Pos.CENTER);
-		
+
 		searchTF.setOnKeyTyped(e -> {
 			String nameS = searchTF.getText();
 			if (nameS == null || nameS.isEmpty()) {
@@ -61,10 +61,11 @@ public class CustomerStage {
 				}
 			}
 			if (temp.size() > 0)
-			customerTable.setItems(temp);
-			else customerTable.setItems(Main.customers);
+				customerTable.setItems(temp);
+			else
+				customerTable.setItems(Main.customers);
 		});
-		
+
 		add = new MyButton("➕ Add", 2);
 		update = new MyButton("✎ Edit", 2);
 		remove = new MyButton("➖ Remove", 2);
@@ -121,14 +122,32 @@ public class CustomerStage {
 					Main.notValidAlert("Not Valid", "Name is empty");
 					return;
 				}
+
 				if (emailS == null || emailS.isEmpty()) {
 					Main.notValidAlert("Not Valid", "Email is empty");
 					return;
 				}
+
+				for (int i = 0; i < Main.customers.size(); i++) {
+					if (Main.customers.get(i).getEmail().equals(emailS)) {
+						Main.notValidAlert("Invalid input", "This email already exists, please enter another email!");
+						return;
+					}
+				}
+
 				if (phoneS == null || phoneS.isEmpty()) {
 					Main.notValidAlert("Not Valid", "Phone is empty");
 					return;
 				}
+
+				for (int i = 0; i < Main.customers.size(); i++) {
+					if (Main.customers.get(i).getPhone().equals(phoneS)) {
+						Main.notValidAlert("Invalid input",
+								"This phone number already exists, please enter another phone number!");
+						return;
+					}
+				}
+
 				if (addressS == null || addressS.isEmpty()) {
 					Main.notValidAlert("Not Valid", "Address is empty");
 					return;
@@ -142,6 +161,7 @@ public class CustomerStage {
 						break;
 					}
 				}
+
 				if (!isDigit) {
 					Main.notValidAlert("Not Valid", "Phone must contain only digits");
 					return;
@@ -154,6 +174,7 @@ public class CustomerStage {
 					Main.notValidAlert("Error", e2.getMessage());
 					return;
 				}
+
 				Main.customers.add(c);
 				Main.validAlert("Customer Added", "Customer added successfully");
 				st.close();
@@ -221,14 +242,32 @@ public class CustomerStage {
 					Main.notValidAlert("Not Valid", "Name is empty");
 					return;
 				}
+
 				if (emailS == null || emailS.isEmpty()) {
 					Main.notValidAlert("Not Valid", "Email is empty");
 					return;
 				}
+
+				for (int i = 0; i < Main.customers.size(); i++) {
+					if (Main.customers.get(i).getEmail().equals(emailS)) {
+						Main.notValidAlert("Invalid input", "This email already exists, please enter another email!");
+						return;
+					}
+				}
+
 				if (phoneS == null || phoneS.isEmpty()) {
 					Main.notValidAlert("Not Valid", "Phone is empty");
 					return;
 				}
+
+				for (int i = 0; i < Main.customers.size(); i++) {
+					if (Main.customers.get(i).getPhone().equals(phoneS)) {
+						Main.notValidAlert("Invalid input",
+								"This phone number already exists, please enter another phone number!");
+						return;
+					}
+				}
+
 				if (addressS == null || addressS.isEmpty()) {
 					Main.notValidAlert("Not Valid", "Address is empty");
 					return;
@@ -272,7 +311,7 @@ public class CustomerStage {
 			ButtonType res = alert.showAndWait().orElse(ButtonType.CANCEL);
 			if (res == ButtonType.OK) {
 				Main.customers.remove(selected);
-			    String sql = "UPDATE customers SET active = FALSE WHERE customer_id = ?";
+				String sql = "UPDATE customers SET active = FALSE WHERE customer_id = ?";
 				try (PreparedStatement stmt = Main.conn.prepareStatement(sql)) {
 					stmt.setInt(1, selected.getCustomerId());
 					stmt.executeUpdate();
@@ -280,12 +319,12 @@ public class CustomerStage {
 					Main.notValidAlert("Error", e1.getMessage());
 					return;
 				}
-				
+
 				Main.validAlert("Customer Removed", "Customer removed successfully");
 			}
 		});
 
-		VBox all = new VBox(10, searchBox,buttons, customerTable);
+		VBox all = new VBox(10, searchBox, buttons, customerTable);
 		all.setAlignment(Pos.CENTER);
 		Scene scene = new Scene(all, 1000, 700);
 		scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());

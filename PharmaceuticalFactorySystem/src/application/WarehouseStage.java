@@ -43,10 +43,10 @@ public class WarehouseStage {
 		add = new MyButton("➕ Add", 2);
 		update = new MyButton("✎ Edit", 2);
 		remove = new MyButton("➖ Remove", 2);
-		
-		HBox buttons = new HBox (10 , add , update , remove);
+
+		HBox buttons = new HBox(10, add, update, remove);
 		buttons.setAlignment(Pos.CENTER);
-		
+
 		Label searchL = new MyLabel("Search Location");
 		TextField searchTF = new MyTextField();
 		HBox searchBox = new HBox(10, searchL, searchTF);
@@ -234,7 +234,7 @@ public class WarehouseStage {
 			alert.setContentText("Are you sure to remove warehouse with id " + selected.getWarehouseId() + " ?");
 			ButtonType res = alert.showAndWait().orElse(ButtonType.CANCEL);
 			if (res == ButtonType.OK) {
-				for (int i =0; i< Main.products.size(); i++) {
+				for (int i = 0; i < Main.products.size(); i++) {
 					if (Main.products.get(i).getWarehouseId() == selected.getWarehouseId()) {
 						Main.products.get(i).setWarehouseId(-1);
 					}
