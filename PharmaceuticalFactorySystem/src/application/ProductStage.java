@@ -21,7 +21,7 @@ public class ProductStage {
 	private TableColumn<Product, Integer> id, quantity;
 	private TableColumn<Product, String> name, category, expiryDate, warehouseId, createdAt;
 	private Button add, update, remove;
-
+	private TableColumn<Product, Double> price;
 	public ProductStage() {
 		productTable = new MyTableView<>();
 		id = productTable.createStyledColumn("Product ID", "productId", Integer.class);
@@ -29,7 +29,10 @@ public class ProductStage {
 		category = productTable.createStyledColumn("Category", "category");
 		expiryDate = productTable.createStyledColumn("Expiry Date", "expiryDate");
 		quantity = productTable.createStyledColumn("Quantity", "quantity", Integer.class);
+		price = productTable.createStyledColumn("Price", "price", Double.class);
+
 		warehouseId = productTable.createStyledColumn("Warehouse ID", "warehouseId");
+
 		warehouseId.setCellValueFactory(cellData -> {
 			Product p = cellData.getValue();
 			int wid = p.getWarehouseId();
@@ -39,7 +42,7 @@ public class ProductStage {
 		});
 		createdAt = productTable.createStyledColumn("Created At", "createdAt");
 
-		productTable.getColumns().addAll(id, name, category, expiryDate, quantity, warehouseId, createdAt);
+		productTable.getColumns().addAll(id, name, category, expiryDate, quantity, price, warehouseId, createdAt);
 		productTable.setItems(Main.products);
 		productTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 		productTable.setMinHeight(500);
@@ -83,6 +86,7 @@ public class ProductStage {
 			Label quantityL = new MyLabel("Quantity");
 			Label warehouseL = new MyLabel("Warehouse ID");
 			Label createdL = new MyLabel("Created At");
+			Label priceL = new MyLabel("Price");
 
 			TextField nameTF = new MyTextField();
 			TextField categoryTF = new MyTextField();
@@ -90,10 +94,11 @@ public class ProductStage {
 			TextField quantityTF = new MyTextField();
 			TextField warehouseTF = new MyTextField();
 			DatePicker createdDP = new DatePicker();
+			TextField priceTF = new MyTextField();
 
 			GridPane g = new GridPane();
-			g.addColumn(0, nameL, categoryL, expiryL, quantityL, warehouseL, createdL);
-			g.addColumn(1, nameTF, categoryTF, expiryDP, quantityTF, warehouseTF, createdDP);
+			g.addColumn(0, nameL, categoryL, expiryL, quantityL, warehouseL, createdL, priceL);
+			g.addColumn(1, nameTF, categoryTF, expiryDP, quantityTF, warehouseTF, createdDP, priceTF);
 			g.setHgap(5);
 			g.setVgap(5);
 			g.setAlignment(Pos.CENTER);
@@ -179,10 +184,25 @@ public class ProductStage {
 						return;
 					}
 				}
+				String priceS = priceTF.getText();
+
+				if (priceS == null || priceS.isEmpty()) {
+					Main.notValidAlert("Not Valid", "Price is empty");
+					return;
+				}
+
+				double priceD = -1;
+				try {
+					priceD = Double.parseDouble(priceS);
+					if (priceD < 0) throw new NumberFormatException();
+				} catch (Exception e2) {
+					Main.notValidAlert("Not Valid", "Price must be a positive number");
+					return;
+				}
 
 				Product p;
 				try {
-					p = new Product(nameS, categoryS, expiry, quantityInt, warehouseIdInt, created);
+					p = new Product(nameS, categoryS, expiry, quantityInt, warehouseIdInt, created,priceD);
 				} catch (SQLException e2) {
 					Main.notValidAlert("Error", e2.getMessage());
 					return;
@@ -207,6 +227,7 @@ public class ProductStage {
 			Label quantityL = new MyLabel("Quantity");
 			Label warehouseL = new MyLabel("Warehouse ID");
 			Label createdL = new MyLabel("Created At");
+			Label priceL = new MyLabel("Price");
 
 			TextField nameTF = new MyTextField();
 			nameTF.setText(selected.getName());
@@ -228,10 +249,14 @@ public class ProductStage {
 
 			DatePicker createdDP = new DatePicker();
 			createdDP.setValue(selected.getCreatedAt().toLocalDate());
+			
+			TextField priceTF = new MyTextField();
+			priceTF.setText(selected.getPrice() + "");
 
 			GridPane g = new GridPane();
-			g.addColumn(0, nameL, categoryL, expiryL, quantityL, warehouseL, createdL);
-			g.addColumn(1, nameTF, categoryTF, expiryDP, quantityTF, warehouseTF, createdDP);
+			g.addColumn(0, nameL, categoryL, expiryL, quantityL, warehouseL, createdL, priceL);
+			g.addColumn(1, nameTF, categoryTF, expiryDP, quantityTF, warehouseTF, createdDP, priceTF);
+
 			g.setHgap(5);
 			g.setVgap(5);
 			g.setAlignment(Pos.CENTER);
@@ -295,6 +320,21 @@ public class ProductStage {
 					Main.notValidAlert("Not Valid", "Quantity must be a positive number");
 					return;
 				}
+				String priceS = priceTF.getText();
+
+				if (priceS == null || priceS.isEmpty()) {
+					Main.notValidAlert("Not Valid", "Price is empty");
+					return;
+				}
+
+				double priceD = -1;
+				try {
+					priceD = Double.parseDouble(priceS);
+					if (priceD < 0) throw new NumberFormatException();
+				} catch (Exception e2) {
+					Main.notValidAlert("Not Valid", "Price must be a positive number");
+					return;
+				}
 
 				int warehouseIdInt = -1;
 				if (warehouseS != null && !warehouseS.equalsIgnoreCase("null") && !warehouseS.isEmpty()) {
@@ -318,7 +358,7 @@ public class ProductStage {
 				}
 
 				try {
-					selected.updateProduct(nameS, categoryS, expiry, quantityInt, warehouseIdInt, created);
+					selected.updateProduct(nameS, categoryS, expiry, quantityInt, warehouseIdInt, created,priceD);
 					productTable.refresh();
 				} catch (SQLException e2) {
 					Main.notValidAlert("Error", e2.getMessage());
