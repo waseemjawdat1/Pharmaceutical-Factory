@@ -19,7 +19,7 @@ import javafx.stage.Stage;
 public class ProductStage {
 	static MyTableView<Product> productTable;
 	private TableColumn<Product, Integer> id, quantity;
-	private TableColumn<Product, String> name, category, expiryDate, warehouseId, createdAt;
+	private TableColumn<Product, String> name, category, warehouseId;
 	private Button add, update, remove;
 	private TableColumn<Product, Double> price;
 	public ProductStage() {
@@ -27,7 +27,6 @@ public class ProductStage {
 		id = productTable.createStyledColumn("Product ID", "productId", Integer.class);
 		name = productTable.createStyledColumn("Name", "name");
 		category = productTable.createStyledColumn("Category", "category");
-		expiryDate = productTable.createStyledColumn("Expiry Date", "expiryDate");
 		quantity = productTable.createStyledColumn("Quantity", "quantity", Integer.class);
 		price = productTable.createStyledColumn("Price", "price", Double.class);
 
@@ -40,9 +39,8 @@ public class ProductStage {
 				return new SimpleStringProperty("null");
 			return new SimpleStringProperty(wid + "");
 		});
-		createdAt = productTable.createStyledColumn("Created At", "createdAt");
 
-		productTable.getColumns().addAll(id, name, category, expiryDate, quantity, price, warehouseId, createdAt);
+		productTable.getColumns().addAll(id, name, category, quantity, price, warehouseId);
 		productTable.setItems(Main.products);
 		productTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 		productTable.setMinHeight(500);
@@ -82,23 +80,19 @@ public class ProductStage {
 			Label title = new MyLabel("Add Product", 1);
 			Label nameL = new MyLabel("Name");
 			Label categoryL = new MyLabel("Category");
-			Label expiryL = new MyLabel("Expiry Date");
 			Label quantityL = new MyLabel("Quantity");
 			Label warehouseL = new MyLabel("Warehouse ID");
-			Label createdL = new MyLabel("Created At");
 			Label priceL = new MyLabel("Price");
 
 			TextField nameTF = new MyTextField();
 			TextField categoryTF = new MyTextField();
-			DatePicker expiryDP = new DatePicker();
 			TextField quantityTF = new MyTextField();
 			TextField warehouseTF = new MyTextField();
-			DatePicker createdDP = new DatePicker();
 			TextField priceTF = new MyTextField();
 
 			GridPane g = new GridPane();
-			g.addColumn(0, nameL, categoryL, expiryL, quantityL, warehouseL, createdL, priceL);
-			g.addColumn(1, nameTF, categoryTF, expiryDP, quantityTF, warehouseTF, createdDP, priceTF);
+			g.addColumn(0, nameL, categoryL, quantityL, warehouseL,  priceL);
+			g.addColumn(1, nameTF, categoryTF,  quantityTF, warehouseTF,  priceTF);
 			g.setHgap(5);
 			g.setVgap(5);
 			g.setAlignment(Pos.CENTER);
@@ -119,10 +113,9 @@ public class ProductStage {
 			clear.setOnAction(e1 -> {
 				nameTF.clear();
 				categoryTF.clear();
-				expiryDP.setValue(null);
 				quantityTF.clear();
+				priceTF.clear();
 				warehouseTF.clear();
-				createdDP.setValue(null);
 			});
 
 			addBtn.setOnAction(e1 -> {
@@ -130,8 +123,6 @@ public class ProductStage {
 				String categoryS = categoryTF.getText();
 				String quantityS = quantityTF.getText();
 				String warehouseS = warehouseTF.getText();
-				Date expiry = expiryDP.getValue() != null ? Date.valueOf(expiryDP.getValue()) : null;
-				Date created = createdDP.getValue() != null ? Date.valueOf(createdDP.getValue()) : null;
 
 				if (nameS == null || nameS.isEmpty()) {
 					Main.notValidAlert("Not Valid", "Name is empty");
@@ -143,14 +134,6 @@ public class ProductStage {
 				}
 				if (quantityS == null || quantityS.isEmpty()) {
 					Main.notValidAlert("Not Valid", "Quantity is empty");
-					return;
-				}
-				if (expiry == null) {
-					Main.notValidAlert("Not Valid", "Expiry date is empty");
-					return;
-				}
-				if (created == null) {
-					Main.notValidAlert("Not Valid", "Created date is empty");
 					return;
 				}
 				if (warehouseS == null || warehouseS.isEmpty()) {
@@ -205,7 +188,7 @@ public class ProductStage {
 
 				Product p;
 				try {
-					p = new Product(nameS, categoryS, expiry, quantityInt, warehouseIdInt, created,priceD);
+					p = new Product(nameS, categoryS, quantityInt, warehouseIdInt,priceD);
 				} catch (SQLException e2) {
 					Main.notValidAlert("Error", e2.getMessage());
 					return;
@@ -238,8 +221,6 @@ public class ProductStage {
 			TextField categoryTF = new MyTextField();
 			categoryTF.setText(selected.getCategory());
 
-			DatePicker expiryDP = new DatePicker();
-			expiryDP.setValue(selected.getExpiryDate().toLocalDate());
 
 			TextField quantityTF = new MyTextField();
 			quantityTF.setText(selected.getQuantity() + "");
@@ -250,15 +231,13 @@ public class ProductStage {
 			else
 				warehouseTF.setText(selected.getWarehouseId() + "");
 
-			DatePicker createdDP = new DatePicker();
-			createdDP.setValue(selected.getCreatedAt().toLocalDate());
 			
 			TextField priceTF = new MyTextField();
 			priceTF.setText(selected.getPrice() + "");
 
 			GridPane g = new GridPane();
 			g.addColumn(0, nameL, categoryL, expiryL, quantityL, warehouseL, createdL, priceL);
-			g.addColumn(1, nameTF, categoryTF, expiryDP, quantityTF, warehouseTF, createdDP, priceTF);
+			g.addColumn(1, nameTF, categoryTF,  quantityTF, warehouseTF,  priceTF);
 
 			g.setHgap(5);
 			g.setVgap(5);
@@ -280,10 +259,8 @@ public class ProductStage {
 			clear.setOnAction(e1 -> {
 				nameTF.clear();
 				categoryTF.clear();
-				expiryDP.setValue(null);
 				quantityTF.clear();
 				warehouseTF.clear();
-				createdDP.setValue(null);
 			});
 
 			updateBtn.setOnAction(e1 -> {
@@ -291,8 +268,6 @@ public class ProductStage {
 				String categoryS = categoryTF.getText();
 				String quantityS = quantityTF.getText();
 				String warehouseS = warehouseTF.getText();
-				Date expiry = expiryDP.getValue() != null ? Date.valueOf(expiryDP.getValue()) : null;
-				Date created = createdDP.getValue() != null ? Date.valueOf(createdDP.getValue()) : null;
 
 				if (nameS == null || nameS.isEmpty()) {
 					Main.notValidAlert("Not Valid", "Name is empty");
@@ -304,14 +279,6 @@ public class ProductStage {
 				}
 				if (quantityS == null || quantityS.isEmpty()) {
 					Main.notValidAlert("Not Valid", "Quantity is empty");
-					return;
-				}
-				if (expiry == null) {
-					Main.notValidAlert("Not Valid", "Expiry date is empty");
-					return;
-				}
-				if (created == null) {
-					Main.notValidAlert("Not Valid", "Created date is empty");
 					return;
 				}
 				if (warehouseS == null || warehouseS.isEmpty()) {
@@ -365,7 +332,7 @@ public class ProductStage {
 				}
 
 				try {
-					selected.updateProduct(nameS, categoryS, expiry, quantityInt, warehouseIdInt, created,priceD);
+					selected.updateProduct(nameS, categoryS,  quantityInt, warehouseIdInt,priceD);
 					productTable.refresh();
 				} catch (SQLException e2) {
 					Main.notValidAlert("Error", e2.getMessage());

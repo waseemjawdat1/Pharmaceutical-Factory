@@ -273,16 +273,14 @@ public class Main extends Application {
 				int id = rs.getInt("product_id");
 				String name = rs.getString("name");
 				String category = rs.getString("category");
-				Date expiry = rs.getDate("expiry_date");
 				int quantity = rs.getInt("quantity");
 				int warehouseId = rs.getInt("warehouse_id");
 				if (rs.wasNull()) {
 					warehouseId = -1;
 				}
-				Date created = rs.getDate("created_at");
 				double price = rs.getDouble("price");
 
-				Product p = new Product(id, name, category, expiry, quantity, warehouseId, created, price);
+				Product p = new Product(id, name, category,  quantity, warehouseId, price);
 				Main.products.add(p);
 			}
 

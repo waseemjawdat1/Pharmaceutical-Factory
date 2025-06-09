@@ -319,8 +319,7 @@ public class ProductTableView {
                     if (selected != null && selected.get()) {
                         int purchasedQty = qty.get();
                         int newQty = p.getQuantity() - purchasedQty;
-                        p.updateProduct(p.getName(), p.getCategory(), p.getExpiryDate(),
-                                newQty, p.getWarehouseId(), p.getCreatedAt(), p.getPrice());
+                        p.updateProduct(p.getName(), p.getCategory(),newQty, p.getWarehouseId(), p.getPrice());
 
                         String sql = "INSERT INTO sales_order_details (sales_order_id, product_id, quantity,unit_price) VALUES (?, ?, ?, ?)";
                         try (PreparedStatement stmt = Main.conn.prepareStatement(sql)) {

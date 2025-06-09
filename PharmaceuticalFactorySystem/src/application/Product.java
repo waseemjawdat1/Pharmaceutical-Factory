@@ -1,6 +1,5 @@
 package application;
 
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,74 +10,62 @@ public class Product {
 	private int productId;
 	private String name;
 	private String category;
-	private Date expiryDate;
 	private int quantity;
 	private int warehouseId;
-	private Date createdAt;
 	private double price;
 
-	public Product(int productId, String name, String category, Date expiryDate, int quantity, int warehouseId, Date createdAt, double price) {
+	public Product(int productId, String name, String category, int quantity, int warehouseId, double price) {
 		this.productId = productId;
 		this.name = name;
 		this.category = category;
-		this.expiryDate = expiryDate;
 		this.quantity = quantity;
 		this.warehouseId = warehouseId;
-		this.createdAt = createdAt;
 		this.price = price;
 	}
 
-	public Product(String name, String category, Date expiryDate, int quantity, int warehouseId, Date createdAt, double price) throws SQLException {
+	public Product(String name, String category, int quantity, int warehouseId, double price) throws SQLException {
 		this.name = name;
 		this.category = category;
-		this.expiryDate = expiryDate;
 		this.quantity = quantity;
 		this.warehouseId = warehouseId;
-		this.createdAt = createdAt;
 		this.price = price;
 		addProductToDB();
 	}
 
 	private void addProductToDB() throws SQLException {
-		String sql = "INSERT INTO products (name, category, expiry_date, quantity, warehouse_id, created_at, price) VALUES (?, ?, ?, ?, ?, ?, ?)";
+		String sql = "INSERT INTO products (name, category, quantity, warehouse_id, price) VALUES (?, ?, ?, ?, ?)";
 		try (PreparedStatement stmt = Main.conn.prepareStatement(sql)) {
 			stmt.setString(1, name);
 			stmt.setString(2, category);
-			stmt.setDate(3, expiryDate);
-			stmt.setInt(4, quantity);
+			stmt.setInt(3, quantity);
 			if (warehouseId == -1)
-				stmt.setNull(5, Types.INTEGER);
+				stmt.setNull(4, Types.INTEGER);
 			else
-				stmt.setInt(5, warehouseId);
-			stmt.setDate(6, createdAt);
-			stmt.setDouble(7, price);
+				stmt.setInt(4, warehouseId);
+			stmt.setDouble(5, price);
 			stmt.executeUpdate();
 			this.productId = getLastId();
 		}
 	}
 
-	public void updateProduct(String name, String category, Date expiryDate, int quantity, int warehouseId, Date createdAt, double price) throws SQLException {
-		String sql = "UPDATE products SET name = ?, category = ?, expiry_date = ?, quantity = ?, warehouse_id = ?, created_at = ?, price = ? WHERE product_id = ?";
+	public void updateProduct(String name, String category, int quantity, int warehouseId, double price) throws SQLException {
+		String sql = "UPDATE products SET name = ?, category = ?, quantity = ?, warehouse_id = ?, price = ? WHERE product_id = ?";
 		try (PreparedStatement stmt = Main.conn.prepareStatement(sql)) {
 			stmt.setString(1, name);
 			stmt.setString(2, category);
-			stmt.setDate(3, expiryDate);
-			stmt.setInt(4, quantity);
+			stmt.setInt(3, quantity);
 			if (warehouseId == -1)
-				stmt.setNull(5, Types.INTEGER);
+				stmt.setNull(4, Types.INTEGER);
 			else
-				stmt.setInt(5, warehouseId);
-			stmt.setDate(6, createdAt);
-			stmt.setDouble(7, price);
-			stmt.setInt(8, productId);
+				stmt.setInt(4, warehouseId);
+			stmt.setDouble(5, price);
+			stmt.setInt(6, productId);
 			stmt.executeUpdate();
 
 			this.name = name;
 			this.category = category;
-			this.expiryDate = expiryDate;
 			this.quantity = quantity;
 			this.warehouseId = warehouseId;
-			this.createdAt = createdAt;
 			this.price = price;
 		}
 	}
@@ -117,14 +104,6 @@ public class Product {
 		this.category = category;
 	}
 
-	public Date getExpiryDate() {
-		return expiryDate;
-	}
-
-	public void setExpiryDate(Date expiryDate) {
-		this.expiryDate = expiryDate;
-	}
-
 	public int getQuantity() {
 		return quantity;
 	}
@@ -139,14 +118,6 @@ public class Product {
 
 	public void setWarehouseId(int warehouseId) {
 		this.warehouseId = warehouseId;
-	}
-
-	public Date getCreatedAt() {
-		return createdAt;
-	}
-
-	public void setCreatedAt(Date createdAt) {
-		this.createdAt = createdAt;
 	}
 
 	public double getPrice() {
