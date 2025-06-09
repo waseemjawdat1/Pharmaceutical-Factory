@@ -234,6 +234,7 @@ public class EmployeeStage {
 						return;
 					}
 				}
+
 				String jobTitle = jobTitleTF.getText();
 				if (jobTitle == null || jobTitle.isEmpty()) {
 					Main.notValidAlert("Invalid Input", "Job Title field is empty!");
@@ -285,6 +286,15 @@ public class EmployeeStage {
 				}
 				Calendar joinedDateCalendar = new GregorianCalendar(joinedDate.getYear(),
 						joinedDate.getMonthValue() - 1, joinedDate.getDayOfMonth());
+
+				Calendar todayDate = Calendar.getInstance();
+				String todayDateString = todayDate.get(Calendar.DATE) + "/" + (todayDate.get(Calendar.MONTH) + 1) + "/"
+						+ todayDate.get(Calendar.YEAR);
+
+				if (todayDate.before(joinedDateCalendar)) {
+					Main.notValidAlert("Invalid input", "Joined Date must be before " + todayDateString + "!");
+					return;
+				}
 
 				try {
 					Employee employee = new Employee(name, email, phone, departmentId, jobTitle, salary, age,
