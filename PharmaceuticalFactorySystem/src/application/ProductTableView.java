@@ -287,6 +287,21 @@ public class ProductTableView {
         Stage stage = new Stage();
         placeOrderBtn.setOnAction(e -> {
             try {
+            	boolean anySelected = false;
+
+            	for (int i = 0; i < Main.products.size(); i++) {
+            	    Product p = Main.products.get(i);
+            	    BooleanProperty selected = selectedMap.get(p);
+            	    if (selected != null && selected.get()) {
+            	        anySelected = true;
+            	        break;
+            	    }
+            	}
+
+            	if (!anySelected) {
+            	    Main.notValidAlert("No Products Selected", "Please select at least one product to place an order.");
+            	    return; 
+            	}
                 double total = Double.parseDouble(totalField.getText().substring(1)); 
 
                 Calendar c = Calendar.getInstance();
@@ -307,11 +322,12 @@ public class ProductTableView {
                         p.updateProduct(p.getName(), p.getCategory(), p.getExpiryDate(),
                                 newQty, p.getWarehouseId(), p.getCreatedAt(), p.getPrice());
 
-                        String sql = "INSERT INTO sales_order_details (sales_order_id, product_id, quantity) VALUES (?, ?, ?)";
+                        String sql = "INSERT INTO sales_order_details (sales_order_id, product_id, quantity,unit_price) VALUES (?, ?, ?, ?)";
                         try (PreparedStatement stmt = Main.conn.prepareStatement(sql)) {
                             stmt.setInt(1, orderId);
                             stmt.setInt(2, p.getProductId());
                             stmt.setInt(3, purchasedQty);
+                            stmt.setDouble(4, p.getPrice());
                             stmt.executeUpdate();
                         }
                     }
