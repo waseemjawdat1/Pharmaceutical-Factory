@@ -100,8 +100,8 @@ public class RawMaterialStage {
 			TextField priceTF = new MyTextField();
 
 			GridPane g = new GridPane();
-			g.addColumn(0, nameL, unitL, supplierL,priceL);
-			g.addColumn(1, nameTF, unitTF, supplierTF,priceTF);
+			g.addColumn(0, nameL, unitL, supplierL, priceL);
+			g.addColumn(1, nameTF, unitTF, supplierTF, priceTF);
 			g.setVgap(5);
 			g.setHgap(5);
 			g.setAlignment(Pos.CENTER);
@@ -130,39 +130,50 @@ public class RawMaterialStage {
 				String unitS = unitTF.getText();
 				String priceS = priceTF.getText();
 				String supplierS = supplierTF.getText();
+
 				if (nameS == null || nameS.isEmpty()) {
 					Main.notValidAlert("Not Valid Input", "Material name is empty");
 					return;
 				}
+
+				for (int i = 0; i < Main.materials.size(); i++) {
+					if (Main.materials.get(i).getName().equals(nameS)) {
+						Main.notValidAlert("Invalid input",
+								"Name of raw material already exists, please enter another name!");
+						return;
+					}
+				}
+
 				if (unitS == null || unitS.isEmpty()) {
 					Main.notValidAlert("Not Valid Input", "Unit is empty");
 					return;
 				}
+
 				int unit = 0;
 				try {
 					unit = Integer.parseInt(unitS);
-				    if (unit < 0) throw new NumberFormatException();
-
+					if (unit < 0)
+						throw new NumberFormatException();
 				} catch (Exception ex) {
 					Main.notValidAlert("Not Valid Input", "Unit must be a non-negative number");
 					return;
 				}
+
 				if (priceS == null || priceS.isEmpty()) {
-				    Main.notValidAlert("Not Valid Input", "Price is empty");
-				    return;
+					Main.notValidAlert("Not Valid Input", "Price is empty");
+					return;
 				}
-				
-				
+
 				double price = 0;
 				try {
-				    price = Double.parseDouble(priceS);
-				    if (price < 0) throw new NumberFormatException();
+					price = Double.parseDouble(priceS);
+					if (price < 0)
+						throw new NumberFormatException();
 				} catch (Exception ex) {
-				    Main.notValidAlert("Not Valid Input", "Price must be a non-negative number");
-				    return;
+					Main.notValidAlert("Not Valid Input", "Price must be a non-negative number");
+					return;
 				}
-				
-				
+
 				int supplierId = -1;
 				if (!supplierS.equalsIgnoreCase("null")) {
 					try {
@@ -172,6 +183,7 @@ public class RawMaterialStage {
 						return;
 					}
 				}
+
 				boolean isExist = false;
 				for (int i = 0; i < Main.suppliers.size(); i++) {
 					if (Main.suppliers.get(i).getSupplierId() == supplierId) {
@@ -179,12 +191,14 @@ public class RawMaterialStage {
 						break;
 					}
 				}
+
 				if (supplierId != -1 && !isExist) {
 					Main.notValidAlert("Not Valid Input", "Supplier id is not exist in system");
 					return;
 				}
+
 				try {
-					RawMaterial r = new RawMaterial(nameS, unit, supplierId , price);
+					RawMaterial r = new RawMaterial(nameS, unit, supplierId, price);
 					Main.materials.add(r);
 					Main.validAlert("Material Added", "Material added to system successfully");
 					addStage.close();
@@ -200,6 +214,7 @@ public class RawMaterialStage {
 				Main.notValidAlert("Nothing selected", "Select material row to remove");
 				return;
 			}
+
 			Alert remove = new Alert(AlertType.CONFIRMATION);
 			remove.setTitle("Remove Material");
 			remove.setHeaderText(null);
@@ -225,6 +240,7 @@ public class RawMaterialStage {
 				Main.notValidAlert("Nothing selected", "Select material row to update");
 				return;
 			}
+
 			Label title = new MyLabel("Update Material", 1);
 			Label nameL = new MyLabel("Name:");
 			TextField nameTF = new MyTextField(selected.getName());
@@ -239,11 +255,12 @@ public class RawMaterialStage {
 				sidStr = "null";
 			else
 				sidStr = selected.getSupplierId() + "";
+
 			TextField supplierTF = new MyTextField(sidStr);
 
 			GridPane g = new GridPane();
-			g.addColumn(0, nameL, unitL, supplierL,priceL);
-			g.addColumn(1, nameTF, unitTF, supplierTF,priceTF);
+			g.addColumn(0, nameL, unitL, supplierL, priceL);
+			g.addColumn(1, nameTF, unitTF, supplierTF, priceTF);
 			g.setVgap(5);
 			g.setHgap(5);
 			g.setAlignment(Pos.CENTER);
@@ -272,37 +289,49 @@ public class RawMaterialStage {
 				String unitS = unitTF.getText();
 				String priceS = priceTF.getText();
 				String supplierS = supplierTF.getText();
+
 				if (nameS == null || nameS.isEmpty()) {
 					Main.notValidAlert("Not Valid Input", "Material name is empty");
 					return;
 				}
-				
+
+				for (int i = 0; i < Main.materials.size(); i++) {
+					if (Main.materials.get(i).getName().equals(nameS)) {
+						Main.notValidAlert("Invalid input",
+								"Name of raw material already exists, please enter another name!");
+						return;
+					}
+				}
+
 				if (unitS == null || unitS.isEmpty()) {
 					Main.notValidAlert("Not Valid Input", "Unit is empty");
 					return;
 				}
-				
+
 				int unit = 0;
 				try {
 					unit = Integer.parseInt(unitS);
-				    if (unit < 0) throw new NumberFormatException();
+					if (unit < 0)
+						throw new NumberFormatException();
 
 				} catch (Exception ex) {
 					Main.notValidAlert("Not Valid Input", "Unit must be a non-negative number");
 					return;
 				}
-				
+
 				if (priceS == null || priceS.isEmpty()) {
-				    Main.notValidAlert("Not Valid Input", "Price is empty");
-				    return;
+					Main.notValidAlert("Not Valid Input", "Price is empty");
+					return;
 				}
+
 				double price = 0;
 				try {
-				    price = Double.parseDouble(priceS);
-				    if (price < 0) throw new NumberFormatException();
+					price = Double.parseDouble(priceS);
+					if (price < 0)
+						throw new NumberFormatException();
 				} catch (Exception ex) {
-				    Main.notValidAlert("Not Valid Input", "Price must be a non-negative number");
-				    return;
+					Main.notValidAlert("Not Valid Input", "Price must be a non-negative number");
+					return;
 				}
 
 				int supplierId = -1;
@@ -314,6 +343,7 @@ public class RawMaterialStage {
 						return;
 					}
 				}
+
 				boolean isExist = false;
 				for (int i = 0; i < Main.suppliers.size(); i++) {
 					if (Main.suppliers.get(i).getSupplierId() == supplierId) {
@@ -321,12 +351,13 @@ public class RawMaterialStage {
 						break;
 					}
 				}
+
 				if (supplierId != -1 && !isExist) {
 					Main.notValidAlert("Not Valid Input", "Supplier id is not exist in system");
 					return;
 				}
 				try {
-					selected.updateMaterial(nameS, unit, supplierId,price);
+					selected.updateMaterial(nameS, unit, supplierId, price);
 					materialTable.refresh();
 					Main.validAlert("Material Updated", "Material updated successfully");
 					updateStage.close();
@@ -346,5 +377,4 @@ public class RawMaterialStage {
 		stage.setScene(scene);
 		stage.show();
 	}
-
 }
