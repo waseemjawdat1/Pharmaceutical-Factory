@@ -183,7 +183,7 @@ public class RawMaterialStage {
 			ButtonType res = remove.showAndWait().orElse(ButtonType.CANCEL);
 			if (res == ButtonType.OK) {
 				Main.materials.remove(selected);
-				String sql = "DELETE FROM raw_materials WHERE material_id = ?";
+				String sql = "UPDATE raw_materials SET active = FALSE WHERE material_id = ?";
 				try (PreparedStatement stmt = Main.conn.prepareStatement(sql)) {
 					stmt.setInt(1, selected.getMaterialId());
 					stmt.executeUpdate();

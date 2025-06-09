@@ -99,7 +99,7 @@ public class Main extends Application {
 	public static void loadDepartments() {
 	    Main.departments.clear(); 
 
-	    String loadAllUsers = "SELECT * FROM departments";
+	    String loadAllUsers = "SELECT * FROM departments ";
 
 	    try (PreparedStatement stmt = Main.conn.prepareStatement(loadAllUsers);
 	         ResultSet rs = stmt.executeQuery()) {
@@ -124,7 +124,7 @@ public class Main extends Application {
 	public static void loadSuppliers() {
 	    Main.suppliers.clear();
 
-	    String sql = "SELECT * FROM suppliers";
+	    String sql = "SELECT * FROM suppliers WHERE active = true";
 
 	    try (PreparedStatement stmt = Main.conn.prepareStatement(sql);
 	         ResultSet rs = stmt.executeQuery()) {
@@ -150,7 +150,7 @@ public class Main extends Application {
 	public static void loadMaterials() {
 		Main.materials.clear();
 
-		String sql = "SELECT * FROM raw_materials";
+		String sql = "SELECT * FROM raw_materials WHERE active = true";
 
 		try (PreparedStatement stmt = Main.conn.prepareStatement(sql);
 		     ResultSet rs = stmt.executeQuery()) {
@@ -176,7 +176,7 @@ public class Main extends Application {
 	public static void loadEmployees() {
 		Main.employees.clear();
 
-		String sql = "SELECT * FROM employees";
+		String sql = "SELECT * FROM employees WHERE active = true";
 
 		try (PreparedStatement stmt = Main.conn.prepareStatement(sql);
 		     ResultSet rs = stmt.executeQuery()) {
@@ -210,7 +210,7 @@ public class Main extends Application {
 	public static void loadCustomers() {
 	    Main.customers.clear();
 
-	    String sql = "SELECT * FROM customers";
+	    String sql = "SELECT * FROM customers WHERE active = true";
 
 	    try (PreparedStatement stmt = Main.conn.prepareStatement(sql);
 	         ResultSet rs = stmt.executeQuery()) {
@@ -260,7 +260,7 @@ public class Main extends Application {
 	public static void loadProducts() {
 	    Main.products.clear();
 
-	    String sql = "SELECT * FROM products";
+	    String sql = "SELECT * FROM products WHERE active = true";
 
 	    try (PreparedStatement stmt = Main.conn.prepareStatement(sql);
 	         ResultSet rs = stmt.executeQuery()) {

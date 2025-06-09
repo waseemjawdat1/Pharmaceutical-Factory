@@ -342,7 +342,7 @@ public class ProductStage {
 			ButtonType res = alert.showAndWait().orElse(ButtonType.CANCEL);
 			if (res == ButtonType.OK) {
 				Main.products.remove(selected);
-				String sql = "DELETE FROM products WHERE product_id = ?";
+				String sql = "UPDATE products SET active = FALSE WHERE product_id = ?";
 				try (PreparedStatement stmt = Main.conn.prepareStatement(sql)) {
 					stmt.setInt(1, selected.getProductId());
 					stmt.executeUpdate();

@@ -272,7 +272,7 @@ public class CustomerStage {
 			ButtonType res = alert.showAndWait().orElse(ButtonType.CANCEL);
 			if (res == ButtonType.OK) {
 				Main.customers.remove(selected);
-				String sql = "DELETE FROM customers WHERE customer_id = ?";
+			    String sql = "UPDATE customers SET active = FALSE WHERE customer_id = ?";
 				try (PreparedStatement stmt = Main.conn.prepareStatement(sql)) {
 					stmt.setInt(1, selected.getCustomerId());
 					stmt.executeUpdate();
@@ -280,6 +280,7 @@ public class CustomerStage {
 					Main.notValidAlert("Error", e1.getMessage());
 					return;
 				}
+				
 				Main.validAlert("Customer Removed", "Customer removed successfully");
 			}
 		});

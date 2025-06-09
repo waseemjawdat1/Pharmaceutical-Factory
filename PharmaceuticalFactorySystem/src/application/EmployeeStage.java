@@ -1,5 +1,6 @@
 package application;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -496,15 +497,12 @@ public class EmployeeStage {
 			ButtonType res = remove.showAndWait().orElse(ButtonType.CANCEL);
 			if (res == ButtonType.OK) {
 				Main.employees.remove(selectedEmployee);
-				String removeEmpSql = "DELETE FROM employees where employee_id = ?";
-				for (int i =0 ;i < Main.employeeStageAssignments.size(); i++) {
-					if (Main.employeeStageAssignments.get(i).getEmployeeId() == selectedEmployee.getEmployeeId()) {
-						Main.employeeStageAssignments.remove(i);
-					}
-				}
+				String removeEmpSql ="UPDATE employees SET active = FALSE WHERE employee_id = ?";
+			
 				try (PreparedStatement stmt = Main.conn.prepareStatement(removeEmpSql)) {
 					stmt.setInt(1, selectedEmployee.getEmployeeId());
 					stmt.executeUpdate();
+					deleteUsersAndAssignments(selectedEmployee.getEmployeeId());
 				} catch (SQLException ex) {
 					Main.notValidAlert("Invalid", ex.getMessage());
 					return;
@@ -514,7 +512,33 @@ public class EmployeeStage {
 			}
 		});
 	}
+	public void deleteUsersAndAssignments(int employeeId) throws SQLException {
+	    String deleteUsers = "DELETE FROM users WHERE employee_id = ?";
+	    String deleteAssignments = "DELETE FROM employee_stage_assignments WHERE employee_id = ?";
 
+	
+	        try (PreparedStatement stmt1 = Main.conn.prepareStatement(deleteUsers);
+	             PreparedStatement stmt2 = Main.conn.prepareStatement(deleteAssignments)) {
+
+	            stmt1.setInt(1, employeeId);
+	            stmt1.executeUpdate();
+
+	            stmt2.setInt(1, employeeId);
+	            stmt2.executeUpdate();
+	        }
+	    	for (int i = 0; i < Main.users.size(); i++) {
+				if (Main.users.get(i).getEmployeeId() == employeeId) {
+					Main.users.remove(i);
+				}
+			}
+			
+			for (int i =0 ;i < Main.employeeStageAssignments.size(); i++) {
+				if (Main.employeeStageAssignments.get(i).getEmployeeId() == employeeId) {
+					Main.employeeStageAssignments.remove(i);
+				}
+			}
+	  
+	}
 	public Label getSearchL() {
 		return searchL;
 	}

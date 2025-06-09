@@ -208,7 +208,7 @@ public class SupplierStage {
             		}
             	}
             	Main.suppliers.remove(selected);
-                String removeSql = "DELETE FROM suppliers WHERE supplier_id = ?";
+                String removeSql = "UPDATE suppliers SET active = FALSE WHERE supplier_id = ?";
                 try (PreparedStatement stmt = Main.conn.prepareStatement(removeSql)) {
                     stmt.setInt(1, selected.getSupplierId());
                     stmt.executeUpdate();
