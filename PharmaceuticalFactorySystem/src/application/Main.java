@@ -34,7 +34,8 @@ public class Main extends Application {
 	static ObservableList <Product> products=  FXCollections.observableArrayList();
 	static ObservableList <ManufacturingStage> manufacturingStages=  FXCollections.observableArrayList();
 	static ObservableList <EmployeeStageAssignment> employeeStageAssignments=  FXCollections.observableArrayList();
-
+	static ObservableList <SalesOrder> salesOrder=  FXCollections.observableArrayList();
+	static User currentUser = null;
 	@Override
 	public void start(Stage primaryStage) {
 		try {			
@@ -46,16 +47,17 @@ public class Main extends Application {
 		     
 		    //    Timeline autoReload = new Timeline(
 		      //  	    new KeyFrame(Duration.seconds(3), e -> {
-		        	        Main.loadUsers();
-		        	        Main.loadDepartments();
-		        	        Main.loadSuppliers();
-		        	        Main.loadMaterials();
-		        	        Main.loadEmployees();
+		        	        loadUsers();
+		        	        loadDepartments();
+		        	        loadSuppliers();
+		        	        loadMaterials();
+		        	        loadEmployees();
 		        	        loadCustomers();
 		        	        loadWarehouses();
 		        	        loadProducts();
 		        	        loadManufacturingStages();
 		        	        loadEmployeeStageAssignments();
+		        	        loadSalesOrders();
 		     //   	    })
 		     //   	);
 		     //   	autoReload.setCycleCount(Timeline.INDEFINITE);
@@ -258,35 +260,39 @@ public class Main extends Application {
 	    }
 	}
 	public static void loadProducts() {
-	    Main.products.clear();
+		Main.products.clear();
 
-	    String sql = "SELECT * FROM products WHERE active = true";
+		String sql = "SELECT * FROM products WHERE active = true";
 
-	    try (PreparedStatement stmt = Main.conn.prepareStatement(sql);
-	         ResultSet rs = stmt.executeQuery()) {
+		try (PreparedStatement stmt = Main.conn.prepareStatement(sql);
+		     ResultSet rs = stmt.executeQuery()) {
 
-	        while (rs.next()) {
-	            int id = rs.getInt("product_id");
-	            String name = rs.getString("name");
-	            String category = rs.getString("category");
-	            Date expiry = rs.getDate("expiry_date");
-	            int quantity = rs.getInt("quantity");
-	            int warehouseId = rs.getInt("warehouse_id");
-	            if (rs.wasNull())
-	                warehouseId = -1;
-	            Date created = rs.getDate("created_at");
+			while (rs.next()) {
+				int id = rs.getInt("product_id");
+				String name = rs.getString("name");
+				String category = rs.getString("category");
+				Date expiry = rs.getDate("expiry_date");
+				int quantity = rs.getInt("quantity");
+				int warehouseId = rs.getInt("warehouse_id");
+				if (rs.wasNull()) {
+					warehouseId = -1;
+				}
+				Date created = rs.getDate("created_at");
+				double price = rs.getDouble("price");
 
-	            Product p = new Product(id, name, category, expiry, quantity, warehouseId, created);
-	            Main.products.add(p);
-	        }
+				Product p = new Product(id, name, category, expiry, quantity, warehouseId, created, price);
+				Main.products.add(p);
+			}
 
-	        if (ProductStage.productTable != null)
-	            ProductStage.productTable.setItems(Main.products);
+			if (ProductStage.productTable != null) {
+				ProductStage.productTable.setItems(Main.products);
+			}
 
-	    } catch (SQLException e) {
-	        Main.notValidAlert("Database Error", e.getMessage());
-	    }
+		} catch (SQLException e) {
+			Main.notValidAlert("Database Error", e.getMessage());
+		}
 	}
+
 	public static void loadManufacturingStages() {
 	    Main.manufacturingStages.clear();
 	    
@@ -333,6 +339,30 @@ public class Main extends Application {
 	        Main.notValidAlert("Database Error", e.getMessage());
 	    }
 	}
+
+	public static void loadSalesOrders() {
+	    salesOrder.clear();
+	    String sql = "SELECT * FROM sales_orders";
+
+	    try (PreparedStatement stmt = conn.prepareStatement(sql);
+	         ResultSet rs = stmt.executeQuery()) {
+
+	        while (rs.next()) {
+	            int orderId = rs.getInt("sales_order_id");
+	            int customerId = rs.getInt("customer_id");
+	            int employeeId = rs.getInt("employee_id");
+	            Date orderDate = rs.getDate("order_date");
+	            double totalAmount = rs.getDouble("total_amount");
+
+	            SalesOrder order = new SalesOrder(orderId, customerId, employeeId, orderDate, totalAmount);
+	            salesOrder.add(order);
+	        }
+
+	    } catch (SQLException e) {
+	        Main.notValidAlert("Database Error", e.getMessage());
+	    }
+	}
+
 
 
 

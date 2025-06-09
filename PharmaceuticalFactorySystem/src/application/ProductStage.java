@@ -153,7 +153,10 @@ public class ProductStage {
 					Main.notValidAlert("Not Valid", "Created date is empty");
 					return;
 				}
-
+				if (warehouseS == null || warehouseS.isEmpty()) {
+					Main.notValidAlert("Not Valid", "Warehouse is empty");
+					return;
+				}	
 				int quantityInt = -1;
 				try {
 					quantityInt = Integer.parseInt(quantityS);
@@ -165,7 +168,7 @@ public class ProductStage {
 				}
 
 				int warehouseIdInt = -1;
-				if (warehouseS != null && !warehouseS.isEmpty()) {
+				if (!warehouseS.equalsIgnoreCase("null") ) {
 					try {
 						warehouseIdInt = Integer.parseInt(warehouseS);
 					} catch (Exception e3) {
@@ -311,6 +314,10 @@ public class ProductStage {
 					Main.notValidAlert("Not Valid", "Created date is empty");
 					return;
 				}
+				if (warehouseS == null || warehouseS.isEmpty()) {
+					Main.notValidAlert("Not Valid", "Warehouse is empty");
+					return;
+				}	
 
 				int quantityInt = -1;
 				try {
@@ -337,7 +344,7 @@ public class ProductStage {
 				}
 
 				int warehouseIdInt = -1;
-				if (warehouseS != null && !warehouseS.equalsIgnoreCase("null") && !warehouseS.isEmpty()) {
+				if (!warehouseS.equalsIgnoreCase("null")) {
 					try {
 						warehouseIdInt = Integer.parseInt(warehouseS);
 					} catch (Exception e3) {

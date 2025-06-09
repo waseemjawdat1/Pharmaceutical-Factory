@@ -13,59 +13,53 @@ public class SalesOrder {
 	private int employeeId;
 	private Date orderDate;
 	private double totalAmount;
-	private String status;
 
-	public SalesOrder(int customerId, int employeeId, Date orderDate, double totalAmount, String status) throws SQLException {
+	public SalesOrder(int customerId, int employeeId, Date orderDate, double totalAmount) throws SQLException {
 		this.customerId = customerId;
 		this.employeeId = employeeId;
 		this.orderDate = orderDate;
 		this.totalAmount = totalAmount;
-		this.status = status;
 		addSalesOrderToDB();
 	}
 
-	public SalesOrder(int salesOrderId, int customerId, int employeeId, Date orderDate, double totalAmount, String status) {
+	public SalesOrder(int salesOrderId, int customerId, int employeeId, Date orderDate, double totalAmount) {
 		this.salesOrderId = salesOrderId;
 		this.customerId = customerId;
 		this.employeeId = employeeId;
 		this.orderDate = orderDate;
 		this.totalAmount = totalAmount;
-		this.status = status;
 	}
 
 	private void addSalesOrderToDB() throws SQLException {
-		String sql = "INSERT INTO sales_orders (customer_id, employee_id, order_date, total_amount, status) VALUES (?, ?, ?, ?, ?)";
+		String sql = "INSERT INTO sales_orders (customer_id, employee_id, order_date, total_amount) VALUES (?, ?, ?, ?)";
 		try (PreparedStatement stmt = Main.conn.prepareStatement(sql)) {
 			stmt.setInt(1, customerId);
 			stmt.setInt(2, employeeId);
 			stmt.setDate(3, orderDate);
 			stmt.setDouble(4, totalAmount);
-			stmt.setString(5, status);
 			stmt.executeUpdate();
 			this.salesOrderId = getLastId();
 		}
 	}
 
-	public void updateSalesOrder(int customerId, int employeeId, Date orderDate, double totalAmount, String status) throws SQLException {
-		String sql = "UPDATE sales_orders SET customer_id = ?, employee_id = ?, order_date = ?, total_amount = ?, status = ? WHERE sales_order_id = ?";
+	public void updateSalesOrder(int customerId, int employeeId, Date orderDate, double totalAmount) throws SQLException {
+		String sql = "UPDATE sales_orders SET customer_id = ?, employee_id = ?, order_date = ?, total_amount = ? WHERE sales_order_id = ?";
 		try (PreparedStatement stmt = Main.conn.prepareStatement(sql)) {
 			stmt.setInt(1, customerId);
 			stmt.setInt(2, employeeId);
 			stmt.setDate(3, orderDate);
 			stmt.setDouble(4, totalAmount);
-			stmt.setString(5, status);
-			stmt.setInt(6, salesOrderId);
+			stmt.setInt(5, salesOrderId);
 			stmt.executeUpdate();
 
 			this.customerId = customerId;
 			this.employeeId = employeeId;
 			this.orderDate = orderDate;
 			this.totalAmount = totalAmount;
-			this.status = status;
 		}
 	}
 
-	private int getLastId() throws SQLException {
+	public static int getLastId() throws SQLException {
 		String sql = "SELECT MAX(sales_order_id) AS last_id FROM sales_orders";
 		try (Statement stmt = Main.conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
 			if (rs.next()) {
@@ -115,11 +109,4 @@ public class SalesOrder {
 		this.totalAmount = totalAmount;
 	}
 
-	public String getStatus() {
-		return status;
-	}
-
-	public void setStatus(String status) {
-		this.status = status;
-	}
 }

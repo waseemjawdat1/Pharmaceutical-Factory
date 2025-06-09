@@ -10,7 +10,6 @@ public class MyTableView<T> extends TableView<T> {
 
     public MyTableView() {
         super();
-        // Fixed: Removed invalid CSS properties that were causing the error
         setStyle(
             "-fx-background-color: #faf8ff;" +
             "-fx-border-color: #e5b8ff;" +
@@ -19,7 +18,6 @@ public class MyTableView<T> extends TableView<T> {
             "-fx-background-radius: 8px;" +
             "-fx-effect: dropshadow(gaussian, rgba(155, 89, 182, 0.2), 8, 0, 0, 4);" +
             "-fx-table-cell-border-color: #e5b8ff;"
-            // Removed: -fx-selection-bar and -fx-selection-bar-non-focused (these don't exist)
         );
         
         setRowFactory(tv -> {

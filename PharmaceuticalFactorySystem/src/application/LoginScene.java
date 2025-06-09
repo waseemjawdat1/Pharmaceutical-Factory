@@ -260,11 +260,18 @@ public class LoginScene {
             
             ResultSet r = checkdata.executeQuery();
             if (r.next()) {
+            	int id = r.getInt("user_id");
                 String name = r.getString("username");
                 String role = r.getString("role");
                 showModernAlert(true, "Welcome " + name, "Logged in as " + role);
+                for (int i = 0; i  < Main.users.size(); i++) {
+                	if (Main.users.get(i).getUserId() == id) {
+                		Main.currentUser = Main.users.get(i);
+                		break;
+                	}
+                }
               //  new UserStage();
-               new EmployeeStageAssignmentStage();
+               new SalesManagement();
             } else {
                 showModernAlert(false, "Login Failed", "Invalid username or password");
             }
