@@ -26,6 +26,8 @@ public class RawMaterialStage {
 	static MyTableView<RawMaterial> materialTable;
 	private TableColumn<RawMaterial, Integer> materialId, unit;
 	private TableColumn<RawMaterial, String> name, supplierId;
+	private TableColumn<RawMaterial, Double> price;
+
 	private Button add, update, remove;
 	private TextField search;
 	private Label searchByMaterialName;
@@ -46,8 +48,9 @@ public class RawMaterialStage {
 			}
 			return new SimpleStringProperty(sid + "");
 		});
+		price = materialTable.createStyledColumn("Price", "price", Double.class);
+		materialTable.getColumns().addAll(materialId, name, unit, supplierId, price);
 
-		materialTable.getColumns().addAll(materialId, name, unit, supplierId);
 		materialTable.setItems(Main.materials);
 		materialTable.setColumnResizePolicy(materialTable.CONSTRAINED_RESIZE_POLICY);
 		materialTable.setMinHeight(500);
@@ -93,10 +96,12 @@ public class RawMaterialStage {
 			TextField unitTF = new MyTextField();
 			Label supplierL = new MyLabel("Supplier Id:");
 			TextField supplierTF = new MyTextField();
+			Label priceL = new MyLabel("Price:");
+			TextField priceTF = new MyTextField();
 
 			GridPane g = new GridPane();
-			g.addColumn(0, nameL, unitL, supplierL);
-			g.addColumn(1, nameTF, unitTF, supplierTF);
+			g.addColumn(0, nameL, unitL, supplierL,priceL);
+			g.addColumn(1, nameTF, unitTF, supplierTF,priceTF);
 			g.setVgap(5);
 			g.setHgap(5);
 			g.setAlignment(Pos.CENTER);
@@ -123,6 +128,7 @@ public class RawMaterialStage {
 			addBtn.setOnAction(e1 -> {
 				String nameS = nameTF.getText();
 				String unitS = unitTF.getText();
+				String priceS = priceTF.getText();
 				String supplierS = supplierTF.getText();
 				if (nameS == null || nameS.isEmpty()) {
 					Main.notValidAlert("Not Valid Input", "Material name is empty");
@@ -135,10 +141,28 @@ public class RawMaterialStage {
 				int unit = 0;
 				try {
 					unit = Integer.parseInt(unitS);
+				    if (unit < 0) throw new NumberFormatException();
+
 				} catch (Exception ex) {
-					Main.notValidAlert("Not Valid Input", "Unit must be a number");
+					Main.notValidAlert("Not Valid Input", "Unit must be a non-negative number");
 					return;
 				}
+				if (priceS == null || priceS.isEmpty()) {
+				    Main.notValidAlert("Not Valid Input", "Price is empty");
+				    return;
+				}
+				
+				
+				double price = 0;
+				try {
+				    price = Double.parseDouble(priceS);
+				    if (price < 0) throw new NumberFormatException();
+				} catch (Exception ex) {
+				    Main.notValidAlert("Not Valid Input", "Price must be a non-negative number");
+				    return;
+				}
+				
+				
 				int supplierId = -1;
 				if (!supplierS.equalsIgnoreCase("null")) {
 					try {
@@ -160,7 +184,7 @@ public class RawMaterialStage {
 					return;
 				}
 				try {
-					RawMaterial r = new RawMaterial(nameS, unit, supplierId);
+					RawMaterial r = new RawMaterial(nameS, unit, supplierId , price);
 					Main.materials.add(r);
 					Main.validAlert("Material Added", "Material added to system successfully");
 					addStage.close();
@@ -207,6 +231,9 @@ public class RawMaterialStage {
 			Label unitL = new MyLabel("Unit:");
 			TextField unitTF = new MyTextField(selected.getUnit() + "");
 			Label supplierL = new MyLabel("Supplier Id:");
+			Label priceL = new MyLabel("Price:");
+			TextField priceTF = new MyTextField(selected.getPrice() + "");
+
 			String sidStr = null;
 			if (selected.getSupplierId() == -1)
 				sidStr = "null";
@@ -215,8 +242,8 @@ public class RawMaterialStage {
 			TextField supplierTF = new MyTextField(sidStr);
 
 			GridPane g = new GridPane();
-			g.addColumn(0, nameL, unitL, supplierL);
-			g.addColumn(1, nameTF, unitTF, supplierTF);
+			g.addColumn(0, nameL, unitL, supplierL,priceL);
+			g.addColumn(1, nameTF, unitTF, supplierTF,priceTF);
 			g.setVgap(5);
 			g.setHgap(5);
 			g.setAlignment(Pos.CENTER);
@@ -243,6 +270,7 @@ public class RawMaterialStage {
 			updateBtn.setOnAction(e1 -> {
 				String nameS = nameTF.getText();
 				String unitS = unitTF.getText();
+				String priceS = priceTF.getText();
 				String supplierS = supplierTF.getText();
 				if (nameS == null || nameS.isEmpty()) {
 					Main.notValidAlert("Not Valid Input", "Material name is empty");
@@ -253,13 +281,30 @@ public class RawMaterialStage {
 					Main.notValidAlert("Not Valid Input", "Unit is empty");
 					return;
 				}
+				
 				int unit = 0;
 				try {
 					unit = Integer.parseInt(unitS);
+				    if (unit < 0) throw new NumberFormatException();
+
 				} catch (Exception ex) {
-					Main.notValidAlert("Not Valid Input", "Unit must be a number");
+					Main.notValidAlert("Not Valid Input", "Unit must be a non-negative number");
 					return;
 				}
+				
+				if (priceS == null || priceS.isEmpty()) {
+				    Main.notValidAlert("Not Valid Input", "Price is empty");
+				    return;
+				}
+				double price = 0;
+				try {
+				    price = Double.parseDouble(priceS);
+				    if (price < 0) throw new NumberFormatException();
+				} catch (Exception ex) {
+				    Main.notValidAlert("Not Valid Input", "Price must be a non-negative number");
+				    return;
+				}
+
 				int supplierId = -1;
 				if (!supplierS.equalsIgnoreCase("null")) {
 					try {
@@ -281,7 +326,7 @@ public class RawMaterialStage {
 					return;
 				}
 				try {
-					selected.updateMaterial(nameS, unit, supplierId);
+					selected.updateMaterial(nameS, unit, supplierId,price);
 					materialTable.refresh();
 					Main.validAlert("Material Updated", "Material updated successfully");
 					updateStage.close();
