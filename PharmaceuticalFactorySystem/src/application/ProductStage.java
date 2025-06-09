@@ -209,7 +209,6 @@ public class ProductStage {
 			Label title = new MyLabel("Update Product", 1);
 			Label nameL = new MyLabel("Name");
 			Label categoryL = new MyLabel("Category");
-			Label expiryL = new MyLabel("Expiry Date");
 			Label quantityL = new MyLabel("Quantity");
 			Label warehouseL = new MyLabel("Warehouse ID");
 			Label createdL = new MyLabel("Created At");
@@ -236,7 +235,7 @@ public class ProductStage {
 			priceTF.setText(selected.getPrice() + "");
 
 			GridPane g = new GridPane();
-			g.addColumn(0, nameL, categoryL, expiryL, quantityL, warehouseL, createdL, priceL);
+			g.addColumn(0, nameL, categoryL, quantityL, warehouseL, priceL);
 			g.addColumn(1, nameTF, categoryTF,  quantityTF, warehouseTF,  priceTF);
 
 			g.setHgap(5);
