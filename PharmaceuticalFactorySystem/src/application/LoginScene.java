@@ -271,7 +271,7 @@ public class LoginScene {
                 	}
                 }
               //  new UserStage();
-               new SalesManagement();
+               new PurchaseManagement();
             } else {
                 showModernAlert(false, "Login Failed", "Invalid username or password");
             }

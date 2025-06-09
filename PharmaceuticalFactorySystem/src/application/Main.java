@@ -34,7 +34,9 @@ public class Main extends Application {
 	static ObservableList <Product> products=  FXCollections.observableArrayList();
 	static ObservableList <ManufacturingStage> manufacturingStages=  FXCollections.observableArrayList();
 	static ObservableList <EmployeeStageAssignment> employeeStageAssignments=  FXCollections.observableArrayList();
-	static ObservableList <SalesOrder> salesOrder=  FXCollections.observableArrayList();
+	static ObservableList <SalesOrder> salesOrders=  FXCollections.observableArrayList();
+	static ObservableList <PurchaseOrder> purchaseOrders=  FXCollections.observableArrayList();
+
 	static User currentUser = null;
 	@Override
 	public void start(Stage primaryStage) {
@@ -58,6 +60,7 @@ public class Main extends Application {
 		        	        loadManufacturingStages();
 		        	        loadEmployeeStageAssignments();
 		        	        loadSalesOrders();
+		        	        loadPurchaseOrders();
 		     //   	    })
 		     //   	);
 		     //   	autoReload.setCycleCount(Timeline.INDEFINITE);
@@ -341,7 +344,7 @@ public class Main extends Application {
 	}
 
 	public static void loadSalesOrders() {
-	    salesOrder.clear();
+	    salesOrders.clear();
 	    String sql = "SELECT * FROM sales_orders";
 
 	    try (PreparedStatement stmt = conn.prepareStatement(sql);
@@ -355,12 +358,35 @@ public class Main extends Application {
 	            double totalAmount = rs.getDouble("total_amount");
 
 	            SalesOrder order = new SalesOrder(orderId, customerId, employeeId, orderDate, totalAmount);
-	            salesOrder.add(order);
+	            salesOrders.add(order);
 	        }
 
 	    } catch (SQLException e) {
 	        Main.notValidAlert("Database Error", e.getMessage());
 	    }
+	}
+	public static void loadPurchaseOrders() {
+		Main.purchaseOrders.clear();
+
+		String sql = "SELECT * FROM purchase_orders";
+
+		try (PreparedStatement stmt = Main.conn.prepareStatement(sql);
+		     ResultSet rs = stmt.executeQuery()) {
+
+			while (rs.next()) {
+				int id = rs.getInt("purchase_order_id");
+				int supplierId = rs.getInt("supplier_id");
+				int employeeId = rs.getInt("employee_id");
+				Date orderDate = rs.getDate("order_date");
+				double totalAmount = rs.getDouble("total_amount");
+
+				PurchaseOrder p = new PurchaseOrder(id, supplierId, employeeId, orderDate, totalAmount);
+				Main.purchaseOrders.add(p);
+			}
+
+		} catch (SQLException e) {
+			Main.notValidAlert("Database Error", e.getMessage());
+		}
 	}
 
 

@@ -286,7 +286,7 @@ public class ProductTableView {
 				Date date = new Date(c.getTimeInMillis());
 
 				SalesOrder s = new SalesOrder(customerId, Main.currentUser.getEmployeeId(), date, total);
-				Main.salesOrder.add(s);
+				Main.salesOrders.add(s);
 
 				int orderId = SalesOrder.getLastId();
 

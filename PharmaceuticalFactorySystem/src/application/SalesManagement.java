@@ -53,9 +53,9 @@ public class SalesManagement {
 			String s = customers.getValue().substring(5, customers.getValue().indexOf(",")).trim();
 			int id = Integer.parseInt(s);
 			ordersList.clear();
-			for (int i = 0; i < Main.salesOrder.size(); i++) {
-				if (Main.salesOrder.get(i).getCustomerId() == id) {
-					ordersList.add(Main.salesOrder.get(i));
+			for (int i = 0; i < Main.salesOrders.size(); i++) {
+				if (Main.salesOrders.get(i).getCustomerId() == id) {
+					ordersList.add(Main.salesOrders.get(i));
 				}
 			}
 		});
@@ -67,9 +67,9 @@ public class SalesManagement {
 			String s = customers.getValue().substring(5, customers.getValue().indexOf(",")).trim();
 			int id = Integer.parseInt(s);
 			ordersList.clear();
-			for (int i = 0; i < Main.salesOrder.size(); i++) {
-				if (Main.salesOrder.get(i).getCustomerId() == id) {
-					ordersList.add(Main.salesOrder.get(i));
+			for (int i = 0; i < Main.salesOrders.size(); i++) {
+				if (Main.salesOrders.get(i).getCustomerId() == id) {
+					ordersList.add(Main.salesOrders.get(i));
 				}
 			}
 		});
@@ -125,7 +125,7 @@ public class SalesManagement {
 					+ selectedOrder.getSalesOrderId() + "?");
 			ButtonType res = remove.showAndWait().orElse(ButtonType.CANCEL);
 			if (res == ButtonType.OK) {
-				Main.salesOrder.remove(selectedOrder);
+				Main.salesOrders.remove(selectedOrder);
 				toFire.fire();
 				String deleteOrderSql = "DELETE FROM sales_orders WHERE sales_order_id = ?";
 				try (PreparedStatement stmt = Main.conn.prepareStatement(deleteOrderSql)) {
