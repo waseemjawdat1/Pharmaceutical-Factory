@@ -164,8 +164,9 @@ public class Main extends Application {
 				int supplierId = rs.getInt("supplier_id");
 				if (rs.wasNull())
 					supplierId = -1;
+				double price = rs.getDouble("price");
 
-				RawMaterial r = new RawMaterial(id, name, unit, supplierId);
+				RawMaterial r = new RawMaterial(id, name, unit, supplierId, price);
 				Main.materials.add(r);
 			}
 			if (RawMaterialStage.materialTable != null)
@@ -175,6 +176,7 @@ public class Main extends Application {
 			Main.notValidAlert("Database Error", e.getMessage());
 		}
 	}
+
 	public static void loadEmployees() {
 		Main.employees.clear();
 
