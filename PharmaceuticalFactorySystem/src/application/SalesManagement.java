@@ -126,6 +126,7 @@ public class SalesManagement {
 			ButtonType res = remove.showAndWait().orElse(ButtonType.CANCEL);
 			if (res == ButtonType.OK) {
 				Main.salesOrder.remove(selectedOrder);
+				toFire.fire();
 				String deleteOrderSql = "DELETE FROM sales_orders WHERE sales_order_id = ?";
 				try (PreparedStatement stmt = Main.conn.prepareStatement(deleteOrderSql)) {
 					stmt.setInt(1, selectedOrder.getSalesOrderId());
@@ -146,51 +147,62 @@ public class SalesManagement {
 				return;
 			}
 
-			Label selectedOrderLabel = new MyLabel("Order ID (" + selectedOrder.getSalesOrderId() + ") details");
-
-//			MyTableView<Product> orderDetailsTableView = new MyTableView<Product>();
-//			TableColumn<Product, Integer> productIDColumn = orderDetailsTableView.createStyledColumn("Product ID",
-//					"productId", Integer.class);
-//			TableColumn<Product, String> nameColumn = orderDetailsTableView.createStyledColumn("Product Name", "name");
-//			TableColumn<Product, Integer> quantityColumn = orderDetailsTableView.createStyledColumn("Quantity",
-//					"quantity", Integer.class);
-//			TableColumn<Product, Double> priceColumn = orderDetailsTableView.createStyledColumn("Price", "price",
-//					Double.class);
-//			
-//			orderDetailsTableView.getColumns().addAll(productIDColumn,nameColumn,quantityColumn,priceColumn);
-//			//orderDetailsTableView.setItems();
-//			orderDetailsTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-//			orderDetailsTableView.setMinHeight(500);
-//			orderDetailsTableView.setMaxWidth(700);
-		//	ObservableList<ViewOrderDetails> viewOrderDetailsList = FXCollections.
+			ObservableList<ViewOrderDetails> viewOrderDetailsList = FXCollections.observableArrayList();
 			String selectProductQuantitySql = "SELECT product_id, quantity,unit_price FROM sales_order_details WHERE sales_order_id = ?";
 			try {
 				PreparedStatement stmt = Main.conn.prepareStatement(selectProductQuantitySql);
 				stmt.setInt(1, selectedOrder.getSalesOrderId());
 				ResultSet rs = stmt.executeQuery();
-				
+
+				String productName = null;
 				while (rs.next()) {
 					int productID = rs.getInt("product_id");
 					int quantity = rs.getInt("quantity");
 					double price = rs.getDouble("unit_price");
-					String productName = null;
 					for (int i = 0; i < Main.products.size(); i++) {
-						if(Main.products.get(i).getProductId() == productID) {
+						if (Main.products.get(i).getProductId() == productID) {
 							productName = Main.products.get(i).getName();
 						}
 					}
-					ViewOrderDetails orderDetails = new ViewOrderDetails(productID, productName, quantity, price);	
+					ViewOrderDetails orderDetails = new ViewOrderDetails(productID, productName, quantity, price);
+					viewOrderDetailsList.add(orderDetails);
 				}
-			} catch (SQLException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+			} catch (SQLException ex) {
+				Main.notValidAlert("Invalid", ex.getMessage());
+				return;
 			}
-			
+
+			Label selectedOrderLabel = new MyLabel("Order ID (" + selectedOrder.getSalesOrderId() + ") details");
+			MyTableView<ViewOrderDetails> orderDetailsTableView = new MyTableView<ViewOrderDetails>();
+			TableColumn<ViewOrderDetails, Integer> productIDColumn = orderDetailsTableView
+					.createStyledColumn("Product ID", "productID", Integer.class);
+			TableColumn<ViewOrderDetails, String> nameColumn = orderDetailsTableView.createStyledColumn("Product Name",
+					"productName");
+			TableColumn<ViewOrderDetails, Integer> quantityColumn = orderDetailsTableView.createStyledColumn("Quantity",
+					"quantity", Integer.class);
+			TableColumn<ViewOrderDetails, Double> priceColumn = orderDetailsTableView.createStyledColumn("Price",
+					"price", Double.class);
+
+			orderDetailsTableView.getColumns().addAll(productIDColumn, nameColumn, quantityColumn, priceColumn);
+			orderDetailsTableView.setItems(viewOrderDetailsList);
+			orderDetailsTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+			orderDetailsTableView.setMinHeight(500);
+			orderDetailsTableView.setMaxWidth(700);
+
+			VBox all = new VBox(10);
+			all.getChildren().addAll(selectedOrderLabel, orderDetailsTableView);
+			all.setAlignment(Pos.CENTER);
+
+			Scene orderDetailScene = new Scene(all, 800, 800);
+			orderDetailScene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+			Stage orderDetailStage = new Stage();
+			orderDetailStage.setScene(orderDetailScene);
+			orderDetailStage.show();
+
 		});
 
 		Scene scene = new Scene(allLeft, 800, 750);
 		scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
-
 		Stage stage = new Stage();
 		stage.setScene(scene);
 		stage.show();
