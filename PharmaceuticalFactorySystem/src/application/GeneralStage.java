@@ -35,7 +35,10 @@ public class GeneralStage {
 		setupStage(role);
 
 		if (role.equalsIgnoreCase("admin")) {
-			addNavigationTab("Overview", null);
+			addNavigationTab("Overview", ()->{
+				setPageTitle("Overview Page");
+				setContent((VBox) (new OverviewDashboard().getOverviewDashboard()));
+			});
 			addNavigationTab("Users", () -> {
 				setPageTitle("Users Management");
 				setContent((VBox) (new UserStage().getAll()));
@@ -67,6 +70,10 @@ public class GeneralStage {
 			addNavigationTab("Production Batches", () -> {
 				setPageTitle("Production Batches");
 				setContent((VBox) (new ProductionBatchTableView().getAll()));
+			});
+			addNavigationTab("Production Statistics", () -> {
+				setPageTitle("Production Statistics");
+				setContent((VBox) (new ProductionStatistics().getAll()));
 			});
 			addNavigationTab("Warehouses", () -> {
 				setPageTitle("Warehouse Management");
@@ -150,6 +157,10 @@ public class GeneralStage {
 				setPageTitle("Production Batches");
 				setContent((VBox) (new ProductionBatchTableView().getAll()));
 			});
+			addNavigationTab("Production Statistics", () -> {
+				setPageTitle("Production Statistics");
+				setContent((VBox) (new ProductionStatistics().getAll()));
+			});
 		}
 		else if (role.equalsIgnoreCase("Production")) {
 			addNavigationTab("Products", () -> {
@@ -163,6 +174,10 @@ public class GeneralStage {
 			addNavigationTab("Production Batches", () -> {
 				setPageTitle("Production Batches");
 				setContent((VBox) (new ProductionBatchTableView().getAll()));
+			});
+			addNavigationTab("Production Statistics", () -> {
+				setPageTitle("Production Statistics");
+				setContent((VBox) (new ProductionStatistics().getAll()));
 			});
 		}
 
