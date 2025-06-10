@@ -97,15 +97,12 @@ public class GeneralStage {
     private void setupStage() {
         stage.setTitle("Admin Dashboard - Management System");
         
-        // Create main layout
         BorderPane root = new BorderPane();
         root.setStyle("-fx-background-color: linear-gradient(to bottom right, #fefeff, #fffeff);");
         
-        // Create sidebar
         sidebar = createSidebar();
         root.setLeft(sidebar);
         
-        // Create main content area
         VBox mainContent = createMainContent();
         root.setCenter(mainContent);
         
@@ -127,17 +124,14 @@ public class GeneralStage {
             "-fx-border-color: rgba(0, 0, 0, 0.1);"
         );
         
-        // Add drop shadow effect
         DropShadow dropShadow = new DropShadow();
         dropShadow.setColor(Color.rgb(0, 0, 0, 0.1));
         dropShadow.setOffsetX(8);
         dropShadow.setRadius(32);
         sidebarContainer.setEffect(dropShadow);
         
-        // Sidebar header
         VBox header = createSidebarHeader();
         
-        // Navigation menu container
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setFitToWidth(true);
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
@@ -161,10 +155,9 @@ public class GeneralStage {
         header.setPadding(new Insets(30, 25, 30, 25));
         header.setAlignment(Pos.CENTER_LEFT);
         
-        // Create gradient background
         LinearGradient gradient = new LinearGradient(0, 0, 1, 1, true, null,
-                new Stop(0, Color.web("#E8E5FF")),  // Very light purple
-                new Stop(1, Color.web("#F0EDFF"))   // Even lighter purple
+                new Stop(0, Color.web("#E8E5FF")), 
+                new Stop(1, Color.web("#F0EDFF"))   
             );
         
         BackgroundFill bgFill = new BackgroundFill(gradient, null, null);
@@ -185,15 +178,12 @@ public class GeneralStage {
     private VBox createMainContent() {
         VBox mainContent = new VBox();
         
-        // Create top header
         HBox topHeader = createTopHeader();
         
-        // Create content area
         contentArea = new BorderPane();
         contentArea.setPadding(new Insets(30));
         contentArea.setStyle("-fx-background-color: transparent;");
         
-        // Default welcome content
         setDefaultContent();
         
         mainContent.getChildren().addAll(topHeader, contentArea);
@@ -212,23 +202,19 @@ public class GeneralStage {
             "-fx-border-color: rgba(0, 0, 0, 0.1);"
         );
         
-        // Add drop shadow
         DropShadow dropShadow = new DropShadow();
         dropShadow.setColor(Color.rgb(0, 0, 0, 0.1));
         dropShadow.setOffsetY(2);
         dropShadow.setRadius(20);
         topHeader.setEffect(dropShadow);
         
-        // Page title
         pageTitle = new Label("Dashboard");
         pageTitle.setFont(Font.font("Georgia", FontWeight.BOLD, 28));
         pageTitle.setTextFill(Color.web("#333333"));
         
-        // Spacer
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
         
-        // User info
         HBox userInfo = createUserInfo();
         
         topHeader.getChildren().addAll(pageTitle, spacer, userInfo);
@@ -240,7 +226,6 @@ public class GeneralStage {
         userInfo.setAlignment(Pos.CENTER_RIGHT);
         userInfo.setSpacing(15);
         
-        // User details
         VBox userDetails = new VBox();
         userDetails.setAlignment(Pos.CENTER_RIGHT);
         
@@ -254,7 +239,6 @@ public class GeneralStage {
         
         userDetails.getChildren().addAll(userName, userRole);
         
-        // User avatar
         Circle avatar = new Circle(22.5);
         
         LinearGradient avatarGradient = new LinearGradient(0, 0, 1, 1, true, null,
@@ -263,13 +247,11 @@ public class GeneralStage {
         );
         avatar.setFill(avatarGradient);
         
-        // Add drop shadow to avatar
         DropShadow avatarShadow = new DropShadow();
         avatarShadow.setColor(Color.web("#8B5CF6", 0.3));
         avatarShadow.setRadius(15);
         avatar.setEffect(avatarShadow);
         
-        // Add initials to avatar
         StackPane avatarContainer = new StackPane();
         Label initials = new Label(getInitials(currentUserName));
         initials.setTextFill(Color.WHITE);
@@ -299,7 +281,6 @@ public class GeneralStage {
             "-fx-padding: 60;"
         );
         
-        // Add drop shadow
         DropShadow shadow = new DropShadow();
         shadow.setColor(Color.rgb(0, 0, 0, 0.1));
         shadow.setRadius(40);
@@ -317,7 +298,6 @@ public class GeneralStage {
         contentArea.setCenter(defaultContent);
     }
     
-    // Public methods for external use
     
     /**
      * Add a navigation tab to the sidebar
@@ -393,7 +373,7 @@ public class GeneralStage {
         this.currentUserName = userName;
         this.currentUserRole = userRole;
         
-        // Refresh the UI by recreating the main content
+        
         BorderPane root = (BorderPane) stage.getScene().getRoot();
         VBox mainContent = createMainContent();
         root.setCenter(mainContent);
@@ -407,7 +387,6 @@ public class GeneralStage {
         button.setPadding(new Insets(15, 25, 15, 25));
         button.setStyle(getInactiveTabStyle());
         
-        // Add hover effect
         button.setOnMouseEntered(e -> {
             if (!button.getStyle().contains("rgba(139, 92, 246, 0.15)")) {
                 button.setStyle(getHoverTabStyle());

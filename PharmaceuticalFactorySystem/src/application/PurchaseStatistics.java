@@ -597,7 +597,6 @@ public class PurchaseStatistics {
         alert.setHeaderText("Failed to load data");
         alert.setContentText("There was an error accessing the database: " + ex.getMessage());
         
-        // Style the alert
         DialogPane dialogPane = alert.getDialogPane();
         dialogPane.setStyle("""
             -fx-background-color: white;
