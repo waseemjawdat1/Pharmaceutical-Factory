@@ -23,6 +23,7 @@ public class ProductStage {
 	private Button add, update, remove;
 	private TableColumn<Product, Double> price;
 	private VBox all;
+	private HBox buttons;
 	public ProductStage() {
 		productTable = new MyTableView<>();
 		id = productTable.createStyledColumn("Product ID", "productId", Integer.class);
@@ -74,9 +75,9 @@ public class ProductStage {
 		update = new MyButton("✎ Update", 2);
 		remove = new MyButton("➖ Delete", 2);
 
-		HBox buttons = new HBox(10, add, update, remove);
+	    buttons = new HBox(10, add, update, remove);
 		buttons.setAlignment(Pos.CENTER);
-
+		
 		add.setOnAction(e -> {
 			Label title = new MyLabel("Add Product", 1);
 			Label nameL = new MyLabel("Name");
@@ -379,5 +380,9 @@ public class ProductStage {
 	}
 	public VBox getAll() {
 		return all;
+	}
+	public void removeBox () {
+		all.getChildren().remove(buttons);
+		
 	}
 }

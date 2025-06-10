@@ -227,6 +227,7 @@ public class UserStage {
 					selected.setPassword(password);
 					selected.setEmployeeId(empId);
 					selected.setRole(role);
+					userTable.refresh();
 					Main.validAlert("User Updated",
 							"User with id " + selected.getUserId() + " was updated successfully");
 					updateStage.close();
