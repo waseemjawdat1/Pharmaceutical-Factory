@@ -280,7 +280,6 @@ public class LoginScene {
                 		break;
                 	}
                 }
-              //  new UserStage();
                new GeneralStage(role,eName);
             } else {
                 showModernAlert(false, "Login Failed", "Invalid username or password");

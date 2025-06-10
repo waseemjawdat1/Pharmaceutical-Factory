@@ -120,7 +120,6 @@ public class PurchaseStatistics {
         grid.setAlignment(Pos.CENTER);
         grid.setPadding(new Insets(10));
 
-        // Create cards
         VBox pieCard = createCard("🥧", "Supplier Purchases", 
             "View total purchase amounts distributed across all suppliers", 
             "#FF6B6B", this::openPieChartStage);
@@ -280,7 +279,6 @@ public class PurchaseStatistics {
         root.setPadding(new Insets(20));
         root.setStyle("-fx-background-color: linear-gradient(to bottom right, #667eea, #764ba2);");
 
-        // Chart container
         VBox chartContainer = new VBox(15);
         chartContainer.setAlignment(Pos.CENTER);
         chartContainer.setPadding(new Insets(20));

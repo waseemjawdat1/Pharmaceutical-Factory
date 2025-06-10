@@ -332,12 +332,7 @@ public class CustomerStage {
 
 		all = new VBox(10, searchBox, buttons, customerTable);
 		all.setAlignment(Pos.CENTER);
-//		Scene scene = new Scene(all, 1000, 700);
-//		scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
-//		Stage stage = new Stage();
-//		stage.setTitle("Customer Stage");
-//		stage.setScene(scene);
-//		stage.show();
+
 	}
 
 	public VBox getAll() {

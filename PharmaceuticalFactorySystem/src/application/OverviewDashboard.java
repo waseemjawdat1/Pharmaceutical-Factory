@@ -14,7 +14,6 @@ public class OverviewDashboard {
     
     private VBox overviewContainer;
     
-    // Database counts
     private int customersCount = 0;
     private int employeesCount = 0;
     private int productsCount = 0;

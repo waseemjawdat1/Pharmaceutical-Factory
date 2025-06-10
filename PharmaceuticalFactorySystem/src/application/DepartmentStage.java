@@ -219,12 +219,6 @@ public class DepartmentStage {
 
 		all = new VBox(10, addBox, buttons, deptTable);
 		all.setAlignment(Pos.CENTER);
-//	Scene scene = new Scene (all , 800, 700);
-//    scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
-//    Stage stage = new Stage ();
-//    stage.setTitle ("Department Stage");
-//    stage.setScene(scene);
-//    stage.show();
 
 	}
 
