@@ -17,36 +17,25 @@ import javafx.stage.Stage;
 import java.sql.*;
 import java.util.*;
 
-public class SalesStatistics {
+public class PurchaseStatistics {
 
     private Stage mainStage;
     private final ComboBox<Integer> monthBox = new ComboBox<>();
     private final ComboBox<Integer> yearBox = new ComboBox<>();
     private VBox root;
-    public SalesStatistics() {
-//        mainStage = new Stage();
-//        mainStage.setTitle("📊 Sales Analytics Dashboard");
-//        mainStage.setMaximized(true);
-
-         root = new VBox(30);
+    
+    public PurchaseStatistics() {
+        root = new VBox(30);
         root.setPadding(new Insets(40));
-//        root.setStyle("-fx-background-color: linear-gradient(to bottom right, #E8F0FF, #F0E8FF);");
 
-//        Label titleLabel = createTitle();
-        
         HBox datePanel = createDateSelectionPanel();
-        
         GridPane cardsGrid = createCardsGrid();
 
-        root.getChildren().addAll( datePanel, cardsGrid);
-//
-//        Scene scene = new Scene(root);
-//        mainStage.setScene(scene);
-//        mainStage.show();
+        root.getChildren().addAll(datePanel, cardsGrid);
     }
 
     private Label createTitle() {
-        Label titleLabel = new Label("📊 Sales Analytics Dashboard");
+        Label titleLabel = new Label("📊 Purchase Analytics Dashboard");
         titleLabel.setFont(Font.font("Segoe UI", FontWeight.BOLD, 42));
         titleLabel.setTextFill(Color.WHITE);
         titleLabel.setAlignment(Pos.CENTER);
@@ -132,24 +121,24 @@ public class SalesStatistics {
         grid.setPadding(new Insets(10));
 
         // Create cards
-        VBox pieCard = createCard("🥧", "Sales Distribution", 
-            "View sales performance distribution across all sales employees", 
+        VBox pieCard = createCard("🥧", "Supplier Purchases", 
+            "View total purchase amounts distributed across all suppliers", 
             "#FF6B6B", this::openPieChartStage);
             
         VBox barCard = createCard("📊", "Daily Orders", 
-            "Analyze daily order count trends and patterns", 
+            "Analyze daily purchase order count trends and patterns", 
             "#4ECDC4", this::openBarChartStage);
             
-        VBox histCard = createCard("🏆", "Top Products", 
-            "Discover your best-selling products and quantities", 
+        VBox histCard = createCard("🏆", "Top Materials", 
+            "Discover your most purchased raw materials and quantities", 
             "#45B7D1", this::openHistogramStage);
             
-        VBox lineCard = createCard("📈", "Sales Trend", 
-            "Track daily sales revenue trends over time", 
+        VBox lineCard = createCard("📈", "Purchase Trend", 
+            "Track daily purchase amount trends over time", 
             "#96CEB4", this::openLineChartStage);
             
-        VBox stackedCard = createCard("👥", "Employee Performance", 
-            "Compare individual employee sales performance", 
+        VBox stackedCard = createCard("👥", "Supplier Materials", 
+            "View active materials count per supplier", 
             "#FECA57", this::openStackedChartStage);
 
         grid.add(pieCard, 0, 0);
@@ -286,7 +275,7 @@ public class SalesStatistics {
     private void openPieChartStage() {
         if (!validateInput()) return;
         
-        Stage stage = createChartStage("Sales Distribution", "🥧");
+        Stage stage = createChartStage("Supplier Purchases Distribution", "🥧");
         BorderPane root = new BorderPane();
         root.setPadding(new Insets(20));
         root.setStyle("-fx-background-color: linear-gradient(to bottom right, #667eea, #764ba2);");
@@ -301,25 +290,24 @@ public class SalesStatistics {
             """);
 
         ObservableList<PieChart.Data> data = FXCollections.observableArrayList();
-        String sql = "SELECT e.name, SUM(so.total_amount) AS total_sales FROM sales_orders so " +
-                     "JOIN employees e ON so.employee_id = e.employee_id " +
-                     "JOIN departments d ON e.department_id = d.department_id " +
-                     "WHERE d.name = 'Sales' AND MONTH(so.order_date) = ? AND YEAR(so.order_date) = ? " +
-                     "GROUP BY e.name";
+        String sql = "SELECT s.name, SUM(po.total_amount) AS total_purchases FROM purchase_orders po " +
+                     "JOIN suppliers s ON po.supplier_id = s.supplier_id " +
+                     "WHERE MONTH(po.order_date) = ? AND YEAR(po.order_date) = ? " +
+                     "GROUP BY s.name";
         
         try (PreparedStatement stmt = Main.conn.prepareStatement(sql)) {
             stmt.setInt(1, monthBox.getValue());
             stmt.setInt(2, yearBox.getValue());
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                data.add(new PieChart.Data(rs.getString("name"), rs.getDouble("total_sales")));
+                data.add(new PieChart.Data(rs.getString("name"), rs.getDouble("total_purchases")));
             }
             
             PieChart chart = new PieChart(data);
-            chart.setTitle("Sales Distribution by Employee");
+            chart.setTitle("Purchase Distribution by Supplier");
             styleChart(chart);
             
-            Label infoLabel = new Label("🥧 Pie chart showing total sales distribution per employee in Sales department for " + 
+            Label infoLabel = new Label("🥧 Pie chart showing total purchase distribution per supplier for " + 
                             getMonthName(monthBox.getValue()) + " " + yearBox.getValue());
             infoLabel.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 14));
             infoLabel.setWrapText(true);
@@ -342,7 +330,7 @@ public class SalesStatistics {
     private void openBarChartStage() {
         if (!validateInput()) return;
         
-        Stage stage = createChartStage("Daily Orders", "📊");
+        Stage stage = createChartStage("Daily Purchase Orders", "📊");
         BorderPane root = new BorderPane();
         root.setPadding(new Insets(20));
         root.setStyle("-fx-background-color: linear-gradient(to bottom right, #4ECDC4, #44A08D);");
@@ -361,15 +349,13 @@ public class SalesStatistics {
         yAxis.setLabel("Number of Orders");
         
         BarChart<String, Number> chart = new BarChart<>(xAxis, yAxis);
-        chart.setTitle("Daily Orders Count");
+        chart.setTitle("Daily Purchase Orders Count");
         XYChart.Series<String, Number> series = new XYChart.Series<>();
         series.setName("Orders");
         
-        String sql = "SELECT so.order_date, COUNT(*) AS order_count FROM sales_orders so " +
-                     "JOIN employees e ON so.employee_id = e.employee_id " +
-                     "JOIN departments d ON e.department_id = d.department_id " +
-                     "WHERE d.name = 'Sales' AND MONTH(so.order_date) = ? AND YEAR(so.order_date) = ? " +
-                     "GROUP BY so.order_date ORDER BY so.order_date";
+        String sql = "SELECT po.order_date, COUNT(*) AS order_count FROM purchase_orders po " +
+                     "WHERE MONTH(po.order_date) = ? AND YEAR(po.order_date) = ? " +
+                     "GROUP BY po.order_date ORDER BY po.order_date";
         
         try (PreparedStatement stmt = Main.conn.prepareStatement(sql)) {
             stmt.setInt(1, monthBox.getValue());
@@ -381,7 +367,7 @@ public class SalesStatistics {
             chart.getData().add(series);
             styleChart(chart);
             
-            Label infoLabel = new Label("📊 Bar chart displaying daily order count by Sales department for " + 
+            Label infoLabel = new Label("📊 Bar chart displaying daily purchase order count for " + 
                             getMonthName(monthBox.getValue()) + " " + yearBox.getValue());
             infoLabel.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 14));
             infoLabel.setWrapText(true);
@@ -404,7 +390,7 @@ public class SalesStatistics {
     private void openHistogramStage() {
         if (!validateInput()) return;
         
-        Stage stage = createChartStage("Top Products", "🏆");
+        Stage stage = createChartStage("Top Materials", "🏆");
         BorderPane root = new BorderPane();
         root.setPadding(new Insets(20));
         root.setStyle("-fx-background-color: linear-gradient(to bottom right, #45B7D1, #2980B9);");
@@ -419,23 +405,21 @@ public class SalesStatistics {
 
         CategoryAxis xAxis = new CategoryAxis();
         NumberAxis yAxis = new NumberAxis();
-        xAxis.setLabel("Product");
-        yAxis.setLabel("Quantity Sold");
+        xAxis.setLabel("Material");
+        yAxis.setLabel("Quantity Purchased");
         
         BarChart<String, Number> chart = new BarChart<>(xAxis, yAxis);
-        chart.setTitle("Top 5 Best Selling Products");
+        chart.setTitle("Top 5 Most Purchased Materials");
         XYChart.Series<String, Number> series = new XYChart.Series<>();
         series.setName("Quantity");
 
         String sql = """
-            SELECT p.name, SUM(d.quantity) AS total_quantity
-            FROM sales_order_details d
-            JOIN sales_orders so ON d.sales_order_id = so.sales_order_id
-            JOIN employees e ON so.employee_id = e.employee_id
-            JOIN departments dep ON e.department_id = dep.department_id
-            JOIN products p ON d.product_id = p.product_id
-            WHERE dep.name = 'Sales' AND MONTH(so.order_date) = ? AND YEAR(so.order_date) = ?
-            GROUP BY p.name ORDER BY total_quantity DESC LIMIT 5
+            SELECT rm.name, SUM(pod.quantity) AS total_quantity
+            FROM purchase_order_details pod
+            JOIN purchase_orders po ON pod.purchase_order_id = po.purchase_order_id
+            JOIN raw_materials rm ON pod.material_id = rm.material_id
+            WHERE MONTH(po.order_date) = ? AND YEAR(po.order_date) = ?
+            GROUP BY rm.name ORDER BY total_quantity DESC LIMIT 5
         """;
 
         try (PreparedStatement stmt = Main.conn.prepareStatement(sql)) {
@@ -449,7 +433,7 @@ public class SalesStatistics {
             chart.getData().add(series);
             styleChart(chart);
             
-            Label infoLabel = new Label("🏆 Top 5 products by quantity sold by Sales department in " + 
+            Label infoLabel = new Label("🏆 Top 5 materials by quantity purchased in " + 
                             getMonthName(monthBox.getValue()) + " " + yearBox.getValue());
             infoLabel.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 14));
             infoLabel.setWrapText(true);
@@ -472,7 +456,7 @@ public class SalesStatistics {
     private void openLineChartStage() {
         if (!validateInput()) return;
         
-        Stage stage = createChartStage("Sales Trend", "📈");
+        Stage stage = createChartStage("Purchase Trend", "📈");
         BorderPane root = new BorderPane();
         root.setPadding(new Insets(20));
         root.setStyle("-fx-background-color: linear-gradient(to bottom right, #96CEB4, #2ECC71);");
@@ -488,20 +472,18 @@ public class SalesStatistics {
         CategoryAxis xAxis = new CategoryAxis();
         NumberAxis yAxis = new NumberAxis();
         xAxis.setLabel("Date");
-        yAxis.setLabel("Sales Amount ($)");
+        yAxis.setLabel("Purchase Amount ($)");
         
         LineChart<String, Number> chart = new LineChart<>(xAxis, yAxis);
-        chart.setTitle("Daily Sales Trend");
+        chart.setTitle("Daily Purchase Trend");
         XYChart.Series<String, Number> series = new XYChart.Series<>();
-        series.setName("Sales Total");
+        series.setName("Purchase Total");
 
         String sql = """
-            SELECT so.order_date, SUM(so.total_amount) AS daily_sales
-            FROM sales_orders so
-            JOIN employees e ON so.employee_id = e.employee_id
-            JOIN departments d ON e.department_id = d.department_id
-            WHERE d.name = 'Sales' AND MONTH(so.order_date) = ? AND YEAR(so.order_date) = ?
-            GROUP BY so.order_date ORDER BY so.order_date
+            SELECT po.order_date, SUM(po.total_amount) AS daily_purchases
+            FROM purchase_orders po
+            WHERE MONTH(po.order_date) = ? AND YEAR(po.order_date) = ?
+            GROUP BY po.order_date ORDER BY po.order_date
         """;
 
         try (PreparedStatement stmt = Main.conn.prepareStatement(sql)) {
@@ -509,13 +491,13 @@ public class SalesStatistics {
             stmt.setInt(2, yearBox.getValue());
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                series.getData().add(new XYChart.Data<>(rs.getDate("order_date").toString(), rs.getDouble("daily_sales")));
+                series.getData().add(new XYChart.Data<>(rs.getDate("order_date").toString(), rs.getDouble("daily_purchases")));
             }
 
             chart.getData().add(series);
             styleChart(chart);
             
-            Label infoLabel = new Label("📈 Daily sales trend showing total revenue by Sales department for " + 
+            Label infoLabel = new Label("📈 Daily purchase trend showing total amount spent for " + 
                             getMonthName(monthBox.getValue()) + " " + yearBox.getValue());
             infoLabel.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 14));
             infoLabel.setWrapText(true);
@@ -538,7 +520,7 @@ public class SalesStatistics {
     private void openStackedChartStage() {
         if (!validateInput()) return;
         
-        Stage stage = createChartStage("Employee Performance", "👥");
+        Stage stage = createChartStage("Active Materials by Supplier", "👥");
         BorderPane root = new BorderPane();
         root.setPadding(new Insets(20));
         root.setStyle("-fx-background-color: linear-gradient(to bottom right, #FECA57, #F39C12);");
@@ -553,42 +535,32 @@ public class SalesStatistics {
 
         CategoryAxis xAxis = new CategoryAxis();
         NumberAxis yAxis = new NumberAxis();
-        xAxis.setLabel("Date");
-        yAxis.setLabel("Sales Amount ($)");
+        xAxis.setLabel("Supplier");
+        yAxis.setLabel("Number of Active Materials");
         
-        StackedBarChart<String, Number> chart = new StackedBarChart<>(xAxis, yAxis);
-        chart.setTitle("Daily Sales Performance by Employee");
+        BarChart<String, Number> chart = new BarChart<>(xAxis, yAxis);
+        chart.setTitle("Active Materials Count by Supplier");
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        series.setName("Active Materials");
 
         String sql = """
-            SELECT e.name, so.order_date, SUM(so.total_amount) AS daily_employee_sales
-            FROM sales_orders so
-            JOIN employees e ON so.employee_id = e.employee_id
-            JOIN departments d ON e.department_id = d.department_id
-            WHERE d.name = 'Sales' AND MONTH(so.order_date) = ? AND YEAR(so.order_date) = ?
-            GROUP BY e.name, so.order_date ORDER BY e.name, so.order_date
+            SELECT s.name, COUNT(rm.material_id) AS active_materials_count
+            FROM suppliers s
+            JOIN raw_materials rm ON s.supplier_id = rm.supplier_id
+            WHERE rm.active = 1
+            GROUP BY s.name ORDER BY active_materials_count DESC
         """;
 
         try (PreparedStatement stmt = Main.conn.prepareStatement(sql)) {
-            stmt.setInt(1, monthBox.getValue());
-            stmt.setInt(2, yearBox.getValue());
             ResultSet rs = stmt.executeQuery();
-
-            Map<String, XYChart.Series<String, Number>> seriesMap = new LinkedHashMap<>();
             while (rs.next()) {
-                String emp = rs.getString("name");
-                String date = rs.getDate("order_date").toString();
-                double total = rs.getDouble("daily_employee_sales");
-
-                seriesMap.putIfAbsent(emp, new XYChart.Series<>());
-                seriesMap.get(emp).setName(emp);
-                seriesMap.get(emp).getData().add(new XYChart.Data<>(date, total));
+                series.getData().add(new XYChart.Data<>(rs.getString("name"), rs.getInt("active_materials_count")));
             }
 
-            chart.getData().addAll(seriesMap.values());
+            chart.getData().add(series);
             styleChart(chart);
             
-            Label infoLabel = new Label("👥 Employee performance comparison showing daily sales distribution for " + 
-                            getMonthName(monthBox.getValue()) + " " + yearBox.getValue());
+            Label infoLabel = new Label("👥 Active materials count comparison showing number of active materials per supplier");
             infoLabel.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 14));
             infoLabel.setWrapText(true);
             infoLabel.setTextFill(Color.rgb(100, 100, 100));
@@ -635,8 +607,8 @@ public class SalesStatistics {
         alert.showAndWait();
         ex.printStackTrace();
     }
+    
     public VBox getAll() {
-    	return root;
+        return root;
     }
-   
 }

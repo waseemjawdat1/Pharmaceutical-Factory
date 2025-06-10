@@ -72,7 +72,14 @@ public class GeneralStage {
         	setPageTitle("Purchase Management");
         	setContent((VBox)(new PurchaseManagement().getAll()));
         });
-        
+        addNavigationTab("Sales Statistics", () ->{
+        	setPageTitle("📊 Sales Analytics Dashboard");
+        	setContent((VBox)(new SalesStatistics().getAll()));
+        });
+        addNavigationTab("Purchase Statistics", () ->{
+        	setPageTitle("📊 Purchase Analytics Dashboard");
+        	setContent((VBox)(new PurchaseStatistics().getAll()));
+        });
         
 
 

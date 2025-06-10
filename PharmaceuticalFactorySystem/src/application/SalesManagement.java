@@ -125,18 +125,45 @@ public class SalesManagement {
 					+ selectedOrder.getSalesOrderId() + "?");
 			ButtonType res = remove.showAndWait().orElse(ButtonType.CANCEL);
 			if (res == ButtonType.OK) {
-				Main.salesOrders.remove(selectedOrder);
-				toFire.fire();
-				String deleteOrderSql = "DELETE FROM sales_orders WHERE sales_order_id = ?";
-				try (PreparedStatement stmt = Main.conn.prepareStatement(deleteOrderSql)) {
+				try {
+					String sql = "SELECT product_id, quantity FROM sales_order_details WHERE sales_order_id = ?";
+					PreparedStatement stmt = Main.conn.prepareStatement(sql);
 					stmt.setInt(1, selectedOrder.getSalesOrderId());
-					stmt.executeUpdate();
+					ResultSet rs = stmt.executeQuery();
+
+					while (rs.next()) {
+						int productId = rs.getInt("product_id");
+						int qty = rs.getInt("quantity");
+
+						int i = 0;
+						while (i < Main.products.size()) {
+							Product p = Main.products.get(i);
+							if (p.getProductId() == productId) {
+								int newQty = p.getQuantity() + qty;
+								p.updateProduct(p.getName(), p.getCategory(), newQty, p.getWarehouseId(), p.getPrice());
+								break;
+							}
+							i++;
+						}
+					}
+
+					Main.salesOrders.remove(selectedOrder);
+					toFire.fire();
+
+					String deleteDetailsSql = "DELETE FROM sales_order_details WHERE sales_order_id = ?";
+					PreparedStatement stmtDetails = Main.conn.prepareStatement(deleteDetailsSql);
+					stmtDetails.setInt(1, selectedOrder.getSalesOrderId());
+					stmtDetails.executeUpdate();
+
+					String deleteOrderSql = "DELETE FROM sales_orders WHERE sales_order_id = ?";
+					PreparedStatement stmtOrder = Main.conn.prepareStatement(deleteOrderSql);
+					stmtOrder.setInt(1, selectedOrder.getSalesOrderId());
+					stmtOrder.executeUpdate();
+
+					Main.validAlert("Delete Order", "The order with ID number " + selectedOrder.getSalesOrderId() + " has been deleted and products have been restocked.");
 				} catch (SQLException ex) {
-					Main.notValidAlert("Invalid", ex.getMessage());
-					return;
+					Main.notValidAlert("Error", ex.getMessage());
 				}
-				Main.validAlert("Delete Order", "The order with ID number " + selectedOrder.getSalesOrderId()
-						+ " has been deleted successfully.");
 			}
 		});
 

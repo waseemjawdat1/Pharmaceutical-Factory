@@ -175,19 +175,73 @@ public class PurchaseManagement {
 			remove.setContentText("Are you sure you want to delete the purchase with ID number " + selectedOrder.getPurchaseOrderId() + "?");
 			ButtonType res = remove.showAndWait().orElse(ButtonType.CANCEL);
 			if (res == ButtonType.OK) {
-				Main.purchaseOrders.remove(selectedOrder);
-				toFire.fire();
-				String deleteOrderSql = "DELETE FROM purchase_orders WHERE purchase_order_id = ?";
 				try {
-					PreparedStatement stmt = Main.conn.prepareStatement(deleteOrderSql);
+					String sql = "SELECT material_id, quantity FROM purchase_order_details WHERE purchase_order_id = ?";
+					PreparedStatement stmt = Main.conn.prepareStatement(sql);
 					stmt.setInt(1, selectedOrder.getPurchaseOrderId());
-					stmt.executeUpdate();
+					ResultSet rs = stmt.executeQuery();
+
+					while (rs.next()) {
+						int materialId = rs.getInt("material_id");
+						int qtyPurchased = rs.getInt("quantity");
+
+						int i = 0;
+						boolean found = false;
+						while (i < Main.materials.size()) {
+							RawMaterial m = Main.materials.get(i);
+							if (m.getMaterialId() == materialId) {
+								found = true;
+								if (m.getUnit() < qtyPurchased) {
+									Main.notValidAlert("Cannot Delete", "Material ID " + materialId + " has only " + m.getUnit() + " units, but this purchase added " + qtyPurchased + ". Purchase more before deletion.");
+									return;
+								}
+								break;
+							}
+							i++;
+						}
+
+						if (!found) {
+							Main.notValidAlert("Error", "Material ID " + materialId + " not found in system.");
+							return;
+						}
+					}
+
+					rs.beforeFirst(); 
+					while (rs.next()) {
+						int materialId = rs.getInt("material_id");
+						int qtyPurchased = rs.getInt("quantity");
+
+						int i = 0;
+						while (i < Main.materials.size()) {
+							RawMaterial m = Main.materials.get(i);
+							if (m.getMaterialId() == materialId) {
+								int newQty = m.getUnit() - qtyPurchased;
+								m.updateMaterial(m.getName(), newQty, m.getSupplierId(), m.getPrice());
+								break;
+							}
+							i++;
+						}
+					}
+
+					Main.purchaseOrders.remove(selectedOrder);
+					toFire.fire();
+
+					String deleteDetailsSql = "DELETE FROM purchase_order_details WHERE purchase_order_id = ?";
+					PreparedStatement stmtDetails = Main.conn.prepareStatement(deleteDetailsSql);
+					stmtDetails.setInt(1, selectedOrder.getPurchaseOrderId());
+					stmtDetails.executeUpdate();
+
+					String deleteOrderSql = "DELETE FROM purchase_orders WHERE purchase_order_id = ?";
+					PreparedStatement stmtOrder = Main.conn.prepareStatement(deleteOrderSql);
+					stmtOrder.setInt(1, selectedOrder.getPurchaseOrderId());
+					stmtOrder.executeUpdate();
+
+					Main.validAlert("Delete Purchase", "The purchase with ID number " + selectedOrder.getPurchaseOrderId() + " has been deleted successfully.");
 				} catch (SQLException ex) {
-					Main.notValidAlert("Invalid", ex.getMessage());
-					return;
+					Main.notValidAlert("Error", ex.getMessage());
 				}
-				Main.validAlert("Delete Purchase", "The purchase with ID number " + selectedOrder.getPurchaseOrderId() + " has been deleted successfully.");
 			}
+
 		});
 
 //		Scene scene = new Scene(allLeft, 800, 750);
