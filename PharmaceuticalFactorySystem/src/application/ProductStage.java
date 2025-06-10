@@ -71,8 +71,8 @@ public class ProductStage {
 		});
 		
 		add = new MyButton("➕ Add", 2);
-		update = new MyButton("✎ Edit", 2);
-		remove = new MyButton("➖ Remove", 2);
+		update = new MyButton("✎ Update", 2);
+		remove = new MyButton("➖ Delete", 2);
 
 		HBox buttons = new HBox(10, add, update, remove);
 		buttons.setAlignment(Pos.CENTER);

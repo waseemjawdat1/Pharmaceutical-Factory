@@ -47,7 +47,7 @@ public class UserStage {
 		userTable.setMaxWidth(700);
 		userTable.setItems(Main.users);
 
-		add = new MyButton("Add User", 2);
+		add = new MyButton("➕ Add", 2);
 		add.setOnAction(e -> {
 			Label addUserL = new MyLabel("Add User", 1);
 			Label userNameL = new MyLabel("User Name : ");
@@ -65,7 +65,7 @@ public class UserStage {
 			g.setHgap(5);
 			g.setAlignment(Pos.CENTER);
 			Button clear = new MyButton("Clear", 2);
-			Button add = new MyButton("Add User", 2);
+			Button add = new MyButton("Add", 2);
 			HBox buttons = new HBox(10, add, clear);
 			buttons.setAlignment(Pos.CENTER);
 			VBox all = new VBox(10, addUserL, g, buttons);
@@ -137,7 +137,7 @@ public class UserStage {
 				employeeIdTF.clear();
 			});
 		});
-		update = new MyButton("Update", 2);
+		update = new MyButton("✎ Update", 2);
 		update.setOnAction(e -> {
 			User selected = userTable.getSelectionModel().getSelectedItem();
 			if (selected == null) {
@@ -165,7 +165,7 @@ public class UserStage {
 			g.setHgap(5);
 			g.setAlignment(Pos.CENTER);
 			Button clear = new MyButton("Clear", 2);
-			Button update = new MyButton("Update User", 2);
+			Button update = new MyButton("Update", 2);
 			HBox buttons = new HBox(10, update, clear);
 			buttons.setAlignment(Pos.CENTER);
 			VBox all = new VBox(10, updateUserL, g, buttons);
@@ -242,7 +242,7 @@ public class UserStage {
 				employeeIdTF.clear();
 			});
 		});
-		remove = new MyButton("Delete", 2);
+		remove = new MyButton("➖ Delete", 2);
 		remove.setOnAction(e -> {
 			User selected = userTable.getSelectionModel().getSelectedItem();
 			if (selected == null) {
@@ -299,13 +299,13 @@ public class UserStage {
 		all = new VBox(10, searchBox, buttons, userTable);
 		all.setAlignment(Pos.CENTER);
 
-		//Scene scene = new Scene(all, 800, 700);
-		//scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+		// Scene scene = new Scene(all, 800, 700);
+		// scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 
-	//	Stage stage = new Stage();
-	///	stage.setScene(scene);
-	//	stage.setTitle("User");
-		//stage.show();
+		// Stage stage = new Stage();
+		/// stage.setScene(scene);
+		// stage.setTitle("User");
+		// stage.show();
 	}
 
 	public TableView<User> getUserTable() {

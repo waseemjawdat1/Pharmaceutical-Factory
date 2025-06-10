@@ -59,9 +59,9 @@ public class EmployeeStage {
 		searchL = new MyLabel("Search by employee Name : ");
 		searchTF = new MyTextField();
 
-		addEmpB = new MyButton("Add", 2);
-		updateEmpB = new MyButton("Update", 2);
-		deleteEmpB = new MyButton("Delete", 2);
+		addEmpB = new MyButton("➕ Add", 2);
+		updateEmpB = new MyButton("✎ Update", 2);
+		deleteEmpB = new MyButton("➖ Delete ", 2);
 
 		employeeTableView = new MyTableView<Employee>();
 		employeeIDColumn = employeeTableView.createStyledColumn("Employee ID", "employeeId", Integer.class);
@@ -157,7 +157,7 @@ public class EmployeeStage {
 			gridPane.setAlignment(Pos.CENTER);
 
 			Button clear = new MyButton("Clear", 2);
-			Button add = new MyButton("Add Employee", 2);
+			Button add = new MyButton("Add", 2);
 			HBox buttons = new HBox(10);
 			buttons.getChildren().addAll(add, clear);
 			buttons.setAlignment(Pos.CENTER);
@@ -369,7 +369,7 @@ public class EmployeeStage {
 			gridPane.setAlignment(Pos.CENTER);
 
 			Button clear = new MyButton("Clear", 2);
-			Button update = new MyButton("Update Employee", 2);
+			Button update = new MyButton("Update", 2);
 			HBox buttons = new HBox(10);
 			buttons.getChildren().addAll(update, clear);
 			buttons.setAlignment(Pos.CENTER);
