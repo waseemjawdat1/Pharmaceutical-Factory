@@ -71,7 +71,7 @@ public class DepartmentStage {
 				}
 			}
 			if (isExist) {
-				Main.notValidAlert("Not Valid Input", "there are department with name : " + deptNameS);
+				Main.notValidAlert("Not Valid Input", "there is department with name : " + deptNameS);
 				return;
 			}
 			Department d;
@@ -227,7 +227,8 @@ public class DepartmentStage {
 //    stage.show();
 
 	}
-	public VBox getAll () {
+
+	public VBox getAll() {
 		return all;
 	}
 

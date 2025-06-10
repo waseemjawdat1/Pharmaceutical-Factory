@@ -27,6 +27,7 @@ public class SupplierStage {
 	private TableColumn<Supplier, String> name, email, phone, address;
 	private Button add, update, remove;
 	private VBox all;
+
 	public SupplierStage() {
 		supplierTable = new MyTableView<>();
 		supplierId = supplierTable.createStyledColumn("Supplier Id", "supplierId", Integer.class);
@@ -195,10 +196,13 @@ public class SupplierStage {
 					return;
 				}
 
-				for (int i = 0; i < Main.suppliers.size(); i++) {
-					if (Main.suppliers.get(i).getEmail().equals(emailS)) {
-						Main.notValidAlert("Invalid input", "This email already exists, please enter another email!");
-						return;
+				if (!emailS.equals(selected.getEmail())) {
+					for (int i = 0; i < Main.suppliers.size(); i++) {
+						if (Main.suppliers.get(i).getEmail().equals(emailS)) {
+							Main.notValidAlert("Invalid input",
+									"This email already exists, please enter another email!");
+							return;
+						}
 					}
 				}
 
@@ -207,11 +211,13 @@ public class SupplierStage {
 					return;
 				}
 
-				for (int i = 0; i < Main.suppliers.size(); i++) {
-					if (Main.suppliers.get(i).getPhone().equals(phoneS)) {
-						Main.notValidAlert("Invalid input",
-								"This phone number already exists, please enter another phone number!");
-						return;
+				if (!phoneS.equals(selected.getPhone())) {
+					for (int i = 0; i < Main.suppliers.size(); i++) {
+						if (Main.suppliers.get(i).getPhone().equals(phoneS)) {
+							Main.notValidAlert("Invalid input",
+									"This phone number already exists, please enter another phone number!");
+							return;
+						}
 					}
 				}
 
@@ -265,7 +271,7 @@ public class SupplierStage {
 		HBox buttons = new HBox(10, add, update, remove);
 		buttons.setAlignment(Pos.CENTER);
 
-	    all = new VBox(10, buttons, supplierTable);
+		all = new VBox(10, buttons, supplierTable);
 		all.setAlignment(Pos.CENTER);
 
 //		Scene scene = new Scene(all, 1000, 700);
@@ -275,7 +281,8 @@ public class SupplierStage {
 //		stage.setScene(scene);
 //		stage.show();
 	}
-	public VBox getAll () {
+
+	public VBox getAll() {
 		return all;
 	}
 }

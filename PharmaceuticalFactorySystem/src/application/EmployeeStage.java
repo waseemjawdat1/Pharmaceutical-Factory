@@ -397,10 +397,13 @@ public class EmployeeStage {
 					return;
 				}
 
-				for (int i = 0; i < Main.employees.size(); i++) {
-					if (Main.employees.get(i).getEmail().equals(email)) {
-						Main.notValidAlert("Invalid input", "This email already exists, please enter another email!");
-						return;
+				if (!email.equals(selectedEmployee.getEmail())) {
+					for (int i = 0; i < Main.employees.size(); i++) {
+						if (Main.employees.get(i).getEmail().equals(email)) {
+							Main.notValidAlert("Invalid input",
+									"This email already exists, please enter another email!");
+							return;
+						}
 					}
 				}
 
@@ -410,11 +413,13 @@ public class EmployeeStage {
 					return;
 				}
 
-				for (int i = 0; i < Main.employees.size(); i++) {
-					if (Main.employees.get(i).getPhone().equals(phone)) {
-						Main.notValidAlert("Invalid input",
-								"This phone number already exists, please enter another phone number!");
-						return;
+				if (!phone.equals(selectedEmployee.getPhone())) {
+					for (int i = 0; i < Main.employees.size(); i++) {
+						if (Main.employees.get(i).getPhone().equals(phone)) {
+							Main.notValidAlert("Invalid input",
+									"This phone number already exists, please enter another phone number!");
+							return;
+						}
 					}
 				}
 

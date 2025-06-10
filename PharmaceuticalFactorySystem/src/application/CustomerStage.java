@@ -28,6 +28,7 @@ public class CustomerStage {
 	private TableColumn<Customer, String> name, email, phone, address;
 	private Button add, update, remove;
 	private VBox all;
+
 	public CustomerStage() {
 		customerTable = new MyTableView<>();
 		id = customerTable.createStyledColumn("ID", "customerId", Integer.class);
@@ -248,10 +249,13 @@ public class CustomerStage {
 					return;
 				}
 
-				for (int i = 0; i < Main.customers.size(); i++) {
-					if (Main.customers.get(i).getEmail().equals(emailS)) {
-						Main.notValidAlert("Invalid input", "This email already exists, please enter another email!");
-						return;
+				if (!emailS.equals(selected.getEmail())) {
+					for (int i = 0; i < Main.customers.size(); i++) {
+						if (Main.customers.get(i).getEmail().equals(emailS)) {
+							Main.notValidAlert("Invalid input",
+									"This email already exists, please enter another email!");
+							return;
+						}
 					}
 				}
 
@@ -260,11 +264,13 @@ public class CustomerStage {
 					return;
 				}
 
-				for (int i = 0; i < Main.customers.size(); i++) {
-					if (Main.customers.get(i).getPhone().equals(phoneS)) {
-						Main.notValidAlert("Invalid input",
-								"This phone number already exists, please enter another phone number!");
-						return;
+				if (!phoneS.equals(selected.getPhone())) {
+					for (int i = 0; i < Main.customers.size(); i++) {
+						if (Main.customers.get(i).getPhone().equals(phoneS)) {
+							Main.notValidAlert("Invalid input",
+									"This phone number already exists, please enter another phone number!");
+							return;
+						}
 					}
 				}
 
@@ -324,7 +330,7 @@ public class CustomerStage {
 			}
 		});
 
-		 all = new VBox(10, searchBox, buttons, customerTable);
+		all = new VBox(10, searchBox, buttons, customerTable);
 		all.setAlignment(Pos.CENTER);
 //		Scene scene = new Scene(all, 1000, 700);
 //		scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
@@ -333,7 +339,8 @@ public class CustomerStage {
 //		stage.setScene(scene);
 //		stage.show();
 	}
-	public VBox getAll () {
+
+	public VBox getAll() {
 		return all;
 	}
 }

@@ -32,7 +32,7 @@ public class RawMaterialStage {
 	private TextField search;
 	private Label searchByMaterialName;
 	private VBox all;
-		
+
 	public RawMaterialStage() {
 
 		materialTable = new MyTableView<>();
@@ -295,11 +295,13 @@ public class RawMaterialStage {
 					return;
 				}
 
-				for (int i = 0; i < Main.materials.size(); i++) {
-					if (Main.materials.get(i).getName().equals(nameS)) {
-						Main.notValidAlert("Invalid input",
-								"Name of raw material already exists, please enter another name!");
-						return;
+				if (!nameS.equals(selected.getName())) {
+					for (int i = 0; i < Main.materials.size(); i++) {
+						if (Main.materials.get(i).getName().equals(nameS)) {
+							Main.notValidAlert("Invalid input",
+									"Name of raw material already exists, please enter another name!");
+							return;
+						}
 					}
 				}
 
@@ -377,7 +379,8 @@ public class RawMaterialStage {
 //		stage.setScene(scene);
 //		stage.show();
 	}
-	public VBox getAll () {
+
+	public VBox getAll() {
 		return all;
 	}
 }

@@ -18,8 +18,8 @@ public class MyButton extends Button {
             setMinHeight(350);
             setStyle3();
         } else {
-            setMinWidth(100);
-            setMinHeight(50);
+            setMinWidth(80);
+            setMinHeight(40);
             setDefaultStyle();
         }
     }
