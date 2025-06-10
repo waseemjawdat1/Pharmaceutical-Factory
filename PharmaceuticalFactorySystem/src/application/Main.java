@@ -36,6 +36,7 @@ public class Main extends Application {
 	static ObservableList <EmployeeStageAssignment> employeeStageAssignments=  FXCollections.observableArrayList();
 	static ObservableList <SalesOrder> salesOrders=  FXCollections.observableArrayList();
 	static ObservableList <PurchaseOrder> purchaseOrders=  FXCollections.observableArrayList();
+    static ObservableList<ProductionBatch> batches = FXCollections.observableArrayList();
 
 	static User currentUser = null;
 	@Override
@@ -46,7 +47,6 @@ public class Main extends Application {
 		        } else {
 		            System.out.println("X");
 		        }
-		     
 		    //    Timeline autoReload = new Timeline(
 		      //  	    new KeyFrame(Duration.seconds(3), e -> {
 		        	        loadUsers();
@@ -61,6 +61,7 @@ public class Main extends Application {
 		        	        loadEmployeeStageAssignments();
 		        	        loadSalesOrders();
 		        	        loadPurchaseOrders();
+		        	        loadProductionBatches();
 		     //   	    })
 		     //   	);
 		     //   	autoReload.setCycleCount(Timeline.INDEFINITE);
@@ -76,6 +77,14 @@ public class Main extends Application {
 		launch(args);
 	}
 	
+	public static RawMaterial getMaterialById(int mid) {
+		for (int i= 0 ; i < materials.size() ; i++) {
+			if (materials.get(i).getMaterialId() == mid) {
+				return materials.get(i);
+			}
+		}
+		return null;
+	}
 	public static void loadUsers() {
 	    Main.users.clear(); 
 
@@ -388,6 +397,31 @@ public class Main extends Application {
 			Main.notValidAlert("Database Error", e.getMessage());
 		}
 	}
+	public static void loadProductionBatches() {
+	    Main.batches.clear();
+	    String sql = "SELECT * FROM production_batches";
+
+	    try (PreparedStatement stmt = Main.conn.prepareStatement(sql);
+	         ResultSet rs = stmt.executeQuery()) {
+
+	        while (rs.next()) {
+	            int id = rs.getInt("batch_id");
+	            int productId = rs.getInt("product_id");
+	            int quantity = rs.getInt("quantity_produced");
+	            int remaining = rs.getInt("remaining");
+	            Date productionDate = rs.getDate("production_date");
+	            Date expiryDate = rs.getDate("expiry_date");
+
+	            ProductionBatch b = new ProductionBatch(id, productId, quantity, remaining, productionDate, expiryDate);
+	            Main.batches.add(b);
+	        }
+
+	    } catch (SQLException e) {
+	        Main.notValidAlert("Database Error", e.getMessage());
+	    }
+	}
+
+
 
 
 

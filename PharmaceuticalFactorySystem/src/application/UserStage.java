@@ -55,7 +55,7 @@ public class UserStage {
 			Label passwordL = new MyLabel("Passowrd : ");
 			TextField passwordTF = new MyTextField();
 			Label roleL = new MyLabel("Role : ");
-			MyComboBox<String> roleCB = new MyComboBox<>("admin", "sales manager", "purchase manager");
+			MyComboBox<String> roleCB = new MyComboBox<>("Admin", "Sales Manager", "Purchase Manager" , "Pre Production" , "Production");
 			Label employeeIdL = new MyLabel("Employee Id : ");
 			TextField employeeIdTF = new MyTextField();
 			GridPane g = new GridPane();
@@ -119,6 +119,12 @@ public class UserStage {
 				if (!isExist) {
 					Main.notValidAlert("Not Valid Input", "Employee id is not exist");
 					return;
+				}
+				for (int i = 0 ; i  < Main.users.size(); i++) {
+					if (Main.users.get(i).getEmployeeId() == empId) {
+						Main.notValidAlert("Not Valid Input", "This employee has an user");
+						return;
+					}
 				}
 				try {
 					User u = new User(userName, password, role, empId);
@@ -221,6 +227,12 @@ public class UserStage {
 				if (!isExist) {
 					Main.notValidAlert("Not Valid Input", "Employee id is not exist");
 					return;
+				}
+				for (int i = 0 ; i  < Main.users.size(); i++) {
+					if (Main.users.get(i).getEmployeeId() == empId && Main.users.get(i) != selected) {
+						Main.notValidAlert("Not Valid Input", "This employee has an user");
+						return;
+					}
 				}
 				try {
 					selected.setUserName(userName);

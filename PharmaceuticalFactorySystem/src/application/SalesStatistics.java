@@ -24,25 +24,16 @@ public class SalesStatistics {
     private final ComboBox<Integer> yearBox = new ComboBox<>();
     private VBox root;
     public SalesStatistics() {
-//        mainStage = new Stage();
-//        mainStage.setTitle("📊 Sales Analytics Dashboard");
-//        mainStage.setMaximized(true);
 
          root = new VBox(30);
         root.setPadding(new Insets(40));
-//        root.setStyle("-fx-background-color: linear-gradient(to bottom right, #E8F0FF, #F0E8FF);");
 
-//        Label titleLabel = createTitle();
         
         HBox datePanel = createDateSelectionPanel();
         
         GridPane cardsGrid = createCardsGrid();
 
         root.getChildren().addAll( datePanel, cardsGrid);
-//
-//        Scene scene = new Scene(root);
-//        mainStage.setScene(scene);
-//        mainStage.show();
     }
 
     private Label createTitle() {
@@ -623,7 +614,6 @@ public class SalesStatistics {
         alert.setHeaderText("Failed to load data");
         alert.setContentText("There was an error accessing the database: " + ex.getMessage());
         
-        // Style the alert
         DialogPane dialogPane = alert.getDialogPane();
         dialogPane.setStyle("""
             -fx-background-color: white;

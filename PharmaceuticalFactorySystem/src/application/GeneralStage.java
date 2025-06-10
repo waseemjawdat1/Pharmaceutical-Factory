@@ -56,9 +56,17 @@ public class GeneralStage {
 				setPageTitle("Sales Management");
 				setContent((VBox) (new SalesManagement().getAll()));
 			});
+			addNavigationTab("Sales Statistics", () -> {
+				setPageTitle("📊 Sales Analytics Dashboard");
+				setContent((VBox) (new SalesStatistics().getAll()));
+			});
 			addNavigationTab("Products", () -> {
 				setPageTitle("Product Management");
 				setContent((VBox) (new ProductStage().getAll()));
+			});
+			addNavigationTab("Production Batches", () -> {
+				setPageTitle("Production Batches");
+				setContent((VBox) (new ProductionBatchTableView().getAll()));
 			});
 			addNavigationTab("Warehouses", () -> {
 				setPageTitle("Warehouse Management");
@@ -76,18 +84,16 @@ public class GeneralStage {
 				setPageTitle("Purchase Management");
 				setContent((VBox) (new PurchaseManagement().getAll()));
 			});
-			addNavigationTab("Sales Statistics", () -> {
-				setPageTitle("📊 Sales Analytics Dashboard");
-				setContent((VBox) (new SalesStatistics().getAll()));
-			});
 			addNavigationTab("Purchase Statistics", () -> {
 				setPageTitle("📊 Purchase Analytics Dashboard");
 				setContent((VBox) (new PurchaseStatistics().getAll()));
 			});
 			
 			
+			
+			
 
-		} else if (role.equalsIgnoreCase("sales manager")) {
+		} else if (role.equalsIgnoreCase("Sales Manager")) {
 			addNavigationTab("Customers", () -> {
 				setPageTitle("Customer Management");
 				setContent((VBox) (new CustomerStage().getAll()));
@@ -108,7 +114,7 @@ public class GeneralStage {
 			});
 			
 			
-		} else if (role.equalsIgnoreCase("purchase manager")) {
+		} else if (role.equalsIgnoreCase("Purchase Manager")) {
 			addNavigationTab("Warehouses", () -> {
 				setPageTitle("Warehouse Management");
 				setContent((VBox) (new WarehouseStage().getAll()));
@@ -130,6 +136,34 @@ public class GeneralStage {
 				setContent((VBox) (new PurchaseStatistics().getAll()));
 			});
 
+		}
+		else if (role.equalsIgnoreCase("Pre Production")) {
+			addNavigationTab("Products", () -> {
+				setPageTitle("Product Management");
+				setContent((VBox) (new ProductStage().getAllForPre()));
+			});
+			addNavigationTab("Raw Materials", () -> {
+				setPageTitle("Raw Materials Management");
+				setContent((VBox) (new RawMaterialStage().getAll()));
+			});
+			addNavigationTab("Production Batches", () -> {
+				setPageTitle("Production Batches");
+				setContent((VBox) (new ProductionBatchTableView().getAll()));
+			});
+		}
+		else if (role.equalsIgnoreCase("Production")) {
+			addNavigationTab("Products", () -> {
+				setPageTitle("Product Management");
+				setContent((VBox) (new ProductStage().getAllForProduction()));
+			});
+			addNavigationTab("Raw Materials", () -> {
+				setPageTitle("Raw Materials Management");
+				setContent((VBox) (new RawMaterialStage().getAll()));
+			});
+			addNavigationTab("Production Batches", () -> {
+				setPageTitle("Production Batches");
+				setContent((VBox) (new ProductionBatchTableView().getAll()));
+			});
 		}
 
 		stage.show();
@@ -208,10 +242,17 @@ public class GeneralStage {
 		header.setBackground(new Background(bgFill));
 
 		Label title = new Label("Admin Panel");
-		if (role.equalsIgnoreCase("sales manager"))
+		if (role.equalsIgnoreCase("Sales Manager"))
 			title.setText("Sales Panel");
-		else if (role.equalsIgnoreCase("purchase manager"))
+		else if (role.equalsIgnoreCase("Purchase Manager"))
 			title.setText("Purchase Panel");
+		else if (role.equalsIgnoreCase("Pre Production")) {
+			title.setText("PreProduction Panel");
+		}
+		else if (role.equalsIgnoreCase("Production")) {
+			title.setText("Production Panel");
+
+		}
 
 		title.setTextFill(Color.web("#4A4A4A"));
 		title.setFont(Font.font("System", FontWeight.BOLD, 24));

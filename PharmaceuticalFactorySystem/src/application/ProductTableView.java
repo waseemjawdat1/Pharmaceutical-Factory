@@ -4,8 +4,11 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Calendar;
-import javafx.beans.value.ChangeListener;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
+import javafx.beans.value.ChangeListener;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
@@ -42,7 +45,7 @@ public class ProductTableView {
 					+ "-fx-padding: 5px; " + "-fx-border-radius: 8px;");
 			row.hoverProperty().addListener((obs, wasHovered, isNowHovered) -> {
 				if (isNowHovered) {
-					row.setStyle("-fx-background-color: rgba(255,255,255,0.95); " + // Fixed: Use solid color
+					row.setStyle("-fx-background-color: rgba(255,255,255,0.95); " +
 							"-fx-background-radius: 8px; " + "-fx-padding: 5px; " + "-fx-border-radius: 8px; "
 							+ "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);");
 				} else {
@@ -60,7 +63,10 @@ public class ProductTableView {
 			Product product = cellData.getValue();
 			return selectedMap.computeIfAbsent(product, p -> {
 				BooleanProperty prop = new SimpleBooleanProperty(false);
-				prop.addListener((obs, oldVal, newVal) -> updateTotal());
+				prop.addListener((obs, oldVal, newVal) -> {
+					updateTotal();
+					table.refresh(); 
+				});
 				return prop;
 			});
 		});
@@ -74,7 +80,8 @@ public class ProductTableView {
 						BooleanProperty prop = selectedMap.get(product);
 						if (prop != null) {
 							prop.set(checkBox.isSelected());
-							table.refresh();
+							updateTotal();
+							table.refresh(); 
 						}
 					}
 				});
@@ -146,19 +153,25 @@ public class ProductTableView {
 
 				IntegerProperty quantityProp = quantityMap.computeIfAbsent(product, p -> {
 					IntegerProperty q = new SimpleIntegerProperty(1);
-					q.addListener((obs, oldVal, newVal) -> updateTotal());
+					q.addListener((obs, oldVal, newVal) -> {
+						updateTotal();
+						table.refresh(); 
+					});
 					return q;
 				});
 
 				spinner.setValueFactory(
 						new SpinnerValueFactory.IntegerSpinnerValueFactory(min, max, quantityProp.get()));
-				quantityProp.set(spinner.getValue());
+				
 				spinner.valueProperty().addListener((obs, oldVal, newVal) -> {
-					spinner.setDisable(availableQty == 0);
-
-					if (newVal != null)
+					if (newVal != null) {
 						quantityProp.set(newVal);
+						updateTotal();
+						table.refresh(); 
+					}
 				});
+				
+				spinner.setDisable(availableQty == 0);
 
 				spinner.setStyle("-fx-background-color: linear-gradient(to bottom, #ffffff, #f7fafc); "
 						+ "-fx-border-color: #cbd5e0; " + "-fx-border-radius: 8px; " + "-fx-background-radius: 8px; "
@@ -172,47 +185,24 @@ public class ProductTableView {
 
 		TableColumn<Product, Double> totalCol = new TableColumn<>("💰 Total");
 		totalCol.setStyle("-fx-font-weight: bold; " + "-fx-text-fill: #2d3748; " + "-fx-alignment: center;");
-		totalCol.setCellValueFactory(cell -> new ReadOnlyObjectWrapper<>(0.0)); // dummy, we override rendering
+		totalCol.setCellValueFactory(cell -> new ReadOnlyObjectWrapper<>(0.0)); 
 		totalCol.setCellFactory(col -> new TableCell<Product, Double>() {
-			private final ChangeListener<Boolean> selectedListener = (obs, oldVal, newVal) -> updateDisplay();
-			private final ChangeListener<Number> quantityListener = (obs, oldVal, newVal) -> updateDisplay();
-
-			private Product currentProduct;
-
-			private void updateDisplay() {
-				if (currentProduct == null)
-					return;
-				boolean selected = selectedMap.getOrDefault(currentProduct, new SimpleBooleanProperty(false)).get();
-				int qty = quantityMap.getOrDefault(currentProduct, new SimpleIntegerProperty(1)).get();
-				double total = selected ? qty * currentProduct.getPrice() : 0.0;
-				setText(String.format("$%.2f", total));
-				setStyle("-fx-font-weight: bold; " + "-fx-text-fill: " + (total > 0 ? "#38a169" : "#718096") + "; "
-						+ "-fx-padding: 10px; " + "-fx-alignment: center;");
-			}
-
 			@Override
 			protected void updateItem(Double item, boolean empty) {
 				super.updateItem(item, empty);
 				if (empty) {
 					setText(null);
-					currentProduct = null;
-				} else {
-					currentProduct = getTableView().getItems().get(getIndex());
-
-					BooleanProperty selected = selectedMap.computeIfAbsent(currentProduct, p -> {
-						BooleanProperty prop = new SimpleBooleanProperty(false);
-						prop.addListener(selectedListener);
-						return prop;
-					});
-
-					IntegerProperty qty = quantityMap.computeIfAbsent(currentProduct, p -> {
-						IntegerProperty prop = new SimpleIntegerProperty(1);
-						prop.addListener(quantityListener);
-						return prop;
-					});
-
-					updateDisplay();
+					return;
 				}
+				
+				Product product = getTableView().getItems().get(getIndex());
+				boolean selected = selectedMap.getOrDefault(product, new SimpleBooleanProperty(false)).get();
+				int qty = quantityMap.getOrDefault(product, new SimpleIntegerProperty(1)).get();
+				double total = selected ? qty * product.getPrice() : 0.0;
+				
+				setText(String.format("$%.2f", total));
+				setStyle("-fx-font-weight: bold; " + "-fx-text-fill: " + (total > 0 ? "#38a169" : "#718096") + "; "
+						+ "-fx-padding: 10px; " + "-fx-alignment: center;");
 			}
 		});
 
@@ -264,59 +254,79 @@ public class ProductTableView {
 						+ "-fx-scale-x: 1.0; " + "-fx-scale-y: 1.0;"));
 		Stage stage = new Stage();
 		placeOrderBtn.setOnAction(e -> {
-			try {
-				boolean anySelected = false;
+		    try {
+		        boolean anySelected = false;
 
-				for (int i = 0; i < Main.products.size(); i++) {
-					Product p = Main.products.get(i);
-					BooleanProperty selected = selectedMap.get(p);
-					if (selected != null && selected.get()) {
-						anySelected = true;
-						break;
-					}
-				}
+		        for (int i = 0; i < Main.products.size(); i++) {
+		            Product p = Main.products.get(i);
+		            BooleanProperty selected = selectedMap.get(p);
+		            if (selected != null && selected.get()) {
+		                anySelected = true;
+		                break;
+		            }
+		        }
 
-				if (!anySelected) {
-					Main.notValidAlert("No Products Selected", "Please select at least one product to place an order.");
-					return;
-				}
-				double total = Double.parseDouble(totalField.getText().substring(1));
+		        if (!anySelected) {
+		            Main.notValidAlert("No Products Selected", "Please select at least one product to place an order.");
+		            return;
+		        }
 
-				Calendar c = Calendar.getInstance();
-				Date date = new Date(c.getTimeInMillis());
+		        double total = Double.parseDouble(totalField.getText().substring(1));
 
-				SalesOrder s = new SalesOrder(customerId, Main.currentUser.getEmployeeId(), date, total);
-				Main.salesOrders.add(s);
+		        Calendar c = Calendar.getInstance();
+		        Date date = new Date(c.getTimeInMillis());
 
-				int orderId = SalesOrder.getLastId();
+		        SalesOrder s = new SalesOrder(customerId, Main.currentUser.getEmployeeId(), date, total);
+		        Main.salesOrders.add(s);
+		        int orderId = SalesOrder.getLastId();
 
-				for (Product p : Main.products) {
-					BooleanProperty selected = selectedMap.get(p);
-					IntegerProperty qty = quantityMap.get(p);
+		        for (Product p : Main.products) {
+		            BooleanProperty selected = selectedMap.get(p);
+		            IntegerProperty qty = quantityMap.get(p);
 
-					if (selected != null && selected.get()) {
-						int purchasedQty = qty.get();
-						int newQty = p.getQuantity() - purchasedQty;
-						p.updateProduct(p.getName(), p.getCategory(), newQty, p.getWarehouseId(), p.getPrice());
+		            if (selected != null && selected.get()) {
+		                int purchasedQty = qty.get();
 
-						String sql = "INSERT INTO sales_order_details (sales_order_id, product_id, quantity,unit_price) VALUES (?, ?, ?, ?)";
-						try (PreparedStatement stmt = Main.conn.prepareStatement(sql)) {
-							stmt.setInt(1, orderId);
-							stmt.setInt(2, p.getProductId());
-							stmt.setInt(3, purchasedQty);
-							stmt.setDouble(4, p.getPrice());
-							stmt.executeUpdate();
-						}
-					}
-				}
+		                int newQty = p.getQuantity() - purchasedQty;
+		                p.updateProduct(p.getName(), p.getCategory(), newQty, p.getWarehouseId(), p.getPrice());
 
-				Main.validAlert("Order Placed", "Order for customer was placed successfully.");
-				SalesManagement.toFire.fire();
-				stage.close();
+		                String sql = "INSERT INTO sales_order_details (sales_order_id, product_id, quantity, unit_price) VALUES (?, ?, ?, ?)";
+		                try (PreparedStatement stmt = Main.conn.prepareStatement(sql)) {
+		                    stmt.setInt(1, orderId);
+		                    stmt.setInt(2, p.getProductId());
+		                    stmt.setInt(3, purchasedQty);
+		                    stmt.setDouble(4, p.getPrice());
+		                    stmt.executeUpdate();
+		                }
 
-			} catch (Exception ex) {
-				Main.notValidAlert("Error", ex.getMessage());
-			}
+		                int qtyToReduce = purchasedQty;
+
+		                List<ProductionBatch> batches = Main.batches.stream()
+		                        .filter(b -> b.getProductId() == p.getProductId() && b.getRemaining() > 0)
+		                        .sorted(Comparator.comparing(ProductionBatch::getExpiryDate))
+		                        .collect(Collectors.toList());
+
+		                for (ProductionBatch batch : batches) {
+		                    if (qtyToReduce == 0) break;
+
+		                    int available = batch.getRemaining();
+		                    int reduce = Math.min(available, qtyToReduce);
+		                    int remaining = available - reduce;
+
+		                    batch.updateBatch(batch.getProductId(), remaining, batch.getProductionDate(), batch.getExpiryDate());
+		                    qtyToReduce -= reduce;
+		                }
+		            }
+		        }
+
+		        Main.validAlert("Order Placed", "Order for customer was placed successfully.");
+		        SalesManagement.toFire.fire();
+		        stage.close();
+
+		    } catch (Exception ex) {
+		        Main.notValidAlert("Error", ex.getMessage());
+		        ex.printStackTrace();
+		    }
 		});
 
 		VBox root = new VBox(25, title, table, totalBox, placeOrderBtn);

@@ -4,7 +4,9 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Calendar;
 
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -23,6 +25,7 @@ public class ProductStage {
 	private Button add, update, remove;
 	private TableColumn<Product, Double> price;
 	private VBox all;
+	private Button makeRecipe;
 	private HBox buttons;
 	public ProductStage() {
 		productTable = new MyTableView<>();
@@ -74,7 +77,136 @@ public class ProductStage {
 		add = new MyButton("➕ Add", 2);
 		update = new MyButton("✎ Update", 2);
 		remove = new MyButton("➖ Delete", 2);
+		Button produce = new MyButton("Produce", 2);
+		produce.setOnAction(e -> {
+			Product selected = productTable.getSelectionModel().getSelectedItem();
+			if (selected == null) {
+				Main.notValidAlert("Nothing Selected", "Select product to produce.");
+				return;
+			}
 
+			int productId = selected.getProductId();
+
+			ObservableList<RecipeRequirement> recipe = FXCollections.observableArrayList();
+			String sql = "SELECT material_id, quantity FROM product_requirements WHERE product_id = ?";
+			try (PreparedStatement stmt = Main.conn.prepareStatement(sql)) {
+				stmt.setInt(1, productId);
+				ResultSet rs = stmt.executeQuery();
+				while (rs.next()) {
+					int mid = rs.getInt("material_id");
+					int qty = rs.getInt("quantity");
+					RawMaterial m = Main.getMaterialById(mid);
+					if (m != null)
+						recipe.add(new RecipeRequirement(m, qty));
+				}
+			} catch (SQLException ex) {
+				Main.notValidAlert("Error", ex.getMessage());
+				return;
+			}
+
+			if (recipe.isEmpty()) {
+				Main.notValidAlert("No Recipe", "This product has no recipe defined.");
+				return;
+			}
+
+			Label title = new MyLabel("Produce Product", 1);
+			MyTableView<RecipeRequirement> table = new MyTableView<>();
+
+			TableColumn<RecipeRequirement, String> nameCol = table.createStyledColumn("Material","requiredQuantity");
+			nameCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().material.getName()));
+			TableColumn<RecipeRequirement, Integer> qtyCol =table.createStyledColumn("Required per unit", "requiredQuantity" , Integer.class);
+			
+			table.getColumns().addAll(nameCol, qtyCol);
+			table.setMaxHeight(500);
+			table.setMaxWidth(700);
+			table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+			table.setItems(recipe);
+			Label qtyL = new MyLabel("Quantity to Produce");
+			TextField qtyTF = new MyTextField();
+			qtyTF.setMaxWidth(200);
+			Button produceBtn = new MyButton("Produce", 2);
+			produceBtn.setOnAction(ev -> {
+			    String val = qtyTF.getText();
+			    int toProduce;
+			    try {
+			        toProduce = Integer.parseInt(val);
+			        if (toProduce <= 0) throw new Exception();
+			    } catch (Exception ex) {
+			        Main.notValidAlert("Invalid Quantity", "Please enter a valid positive number.");
+			        return;
+			    }
+
+			    for (RecipeRequirement r : recipe) {
+			        int totalNeeded = r.requiredQuantity * toProduce;
+			        RawMaterial inv = Main.getMaterialById(r.material.getMaterialId());
+			        if (inv.getUnit() < totalNeeded) {
+			            Main.notValidAlert("Insufficient Material",
+			                    "Not enough " + inv.getName() + ". Needed: " + totalNeeded + ", Available: " + inv.getUnit());
+			            return;
+			        }
+			    }
+
+			    for (RecipeRequirement r : recipe) {
+			        int totalNeeded = r.requiredQuantity * toProduce;
+			        RawMaterial inv = Main.getMaterialById(r.material.getMaterialId());
+			        try {
+			            inv.updateMaterial(inv.getName(), inv.getUnit() - totalNeeded, inv.getSupplierId(), inv.getPrice());
+			        } catch (SQLException e1) {
+			            Main.notValidAlert("Not Valid", e1.getMessage());
+			        }
+			    }
+
+			    DatePicker expiryPicker = new DatePicker();
+			    Button confirmBtn = new MyButton("Confirm", 2);
+			    VBox expiryLayout = new VBox(10, new MyLabel("Enter Expiry Date:"), expiryPicker, confirmBtn);
+			    expiryLayout.setAlignment(Pos.CENTER);
+			    Stage expiryStage = new Stage();
+			    expiryStage.setScene(new Scene(expiryLayout, 400, 300));
+			    expiryStage.setTitle("Expiry Date");
+			    expiryStage.show();
+
+			    confirmBtn.setOnAction(ex -> {
+			        if (expiryPicker.getValue() == null) {
+			            Main.notValidAlert("Missing Date", "Please select an expiry date.");
+			            return;
+			        }
+
+			        Date expiryDate = Date.valueOf(expiryPicker.getValue());
+			        Date productionDate = new Date(Calendar.getInstance().getTimeInMillis());
+
+			        try {
+			            selected.updateProduct(
+			                selected.getName(),
+			                selected.getCategory(),
+			                selected.getQuantity() + toProduce,
+			                selected.getWarehouseId(),
+			                selected.getPrice()
+			            );
+			            productTable.refresh();
+
+			            
+			            ProductionBatch batch = new ProductionBatch(
+			                selected.getProductId(), toProduce, productionDate, expiryDate
+			            );
+			            Main.batches.add(batch);
+			            Main.validAlert("Production Successful", "Produced " + toProduce + " units of " + selected.getName());
+			            expiryStage.close();
+			            ((Stage)((Button)ev.getSource()).getScene().getWindow()).close();
+			        } catch (SQLException ex2) {
+			            Main.notValidAlert("Error", ex2.getMessage());
+			        }
+			    });
+			});
+
+			VBox layout = new VBox(10, title, table, qtyL, qtyTF, produceBtn);
+			layout.setAlignment(Pos.CENTER);
+			Scene scene = new Scene(layout, 800, 750);
+			scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+			Stage stage = new Stage();
+			stage.setScene(scene);
+			stage.setTitle("Produce Product");
+			stage.show();
+		});
 	    buttons = new HBox(10, add, update, remove);
 		buttons.setAlignment(Pos.CENTER);
 		
@@ -98,7 +230,7 @@ public class ProductStage {
 			g.setHgap(5);
 			g.setVgap(5);
 			g.setAlignment(Pos.CENTER);
-
+			
 			Button addBtn = new MyButton("Add", 2);
 			Button clear = new MyButton("Clear", 2);
 			HBox buttons1 = new HBox(10, addBtn, clear);
@@ -343,7 +475,47 @@ public class ProductStage {
 				st.close();
 			});
 		});
+		makeRecipe = new MyButton ("Make Recipe",2);
+		makeRecipe.setOnAction(e -> {
+		    Product selected = productTable.getSelectionModel().getSelectedItem();
+		    if (selected == null) {
+		        Main.notValidAlert("Nothing Selected", "Please select a product to define its recipe.");
+		        return;
+		    }
 
+		    int productId = selected.getProductId();
+
+		    String checkSql = "SELECT 1 FROM product_requirements WHERE product_id = ? LIMIT 1";
+
+		    try (PreparedStatement checkStmt = Main.conn.prepareStatement(checkSql)) {
+		        checkStmt.setInt(1, productId);
+		        ResultSet rs = checkStmt.executeQuery();
+
+		        if (rs.next()) {
+		            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+		            confirm.setTitle("Override Existing Recipe");
+		            confirm.setHeaderText("This product already has a recipe.");
+		            confirm.setContentText("Do you want to override the existing recipe?");
+		            ButtonType result = confirm.showAndWait().orElse(ButtonType.CANCEL);
+
+		            if (result != ButtonType.OK) {
+		                return; 
+		            }
+
+		            String deleteSql = "DELETE FROM product_requirements WHERE product_id = ?";
+		            try (PreparedStatement deleteStmt = Main.conn.prepareStatement(deleteSql)) {
+		                deleteStmt.setInt(1, productId);
+		                deleteStmt.executeUpdate();
+		            }
+		        }
+		    } catch (SQLException ex) {
+		        Main.notValidAlert("Database Error", ex.getMessage());
+		        return;
+		    }
+
+		    new RawMaterialRequirementSelector(productId);
+		});
+		
 		remove.setOnAction(e -> {
 			Product selected = productTable.getSelectionModel().getSelectedItem();
 			if (selected == null) {
@@ -368,18 +540,25 @@ public class ProductStage {
 				Main.validAlert("Product Removed", "Product removed successfully");
 			}
 		});
-
-		all = new VBox(10,searchBox, buttons, productTable);
+		HBox produceBox = new HBox (10 , produce , makeRecipe);
+		produceBox.setAlignment(Pos.CENTER);
+		all = new VBox(10,searchBox, buttons, productTable, produceBox);
 		all.setAlignment(Pos.CENTER);
-//		Scene scene = new Scene(all, 1100, 700);
-//		scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
-//		Stage stage = new Stage();
-//		stage.setTitle("Product Stage");
-//		stage.setScene(scene);
-//		stage.show();
+
 	}
 	public VBox getAll() {
 		return all;
+	}
+	public VBox getAllForPre() {
+		buttons.getChildren().remove(0);
+		return all;
+	}
+	public VBox getAllForProduction() {
+		buttons.getChildren().remove(1);
+		return all;
+	}
+	public void addMake() {
+		all.getChildren().add(1, this.makeRecipe);
 	}
 	public void removeBox () {
 		all.getChildren().remove(buttons);
