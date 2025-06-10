@@ -26,7 +26,7 @@ public class SupplierStage {
 	private TableColumn<Supplier, Integer> supplierId;
 	private TableColumn<Supplier, String> name, email, phone, address;
 	private Button add, update, remove;
-
+	private VBox all;
 	public SupplierStage() {
 		supplierTable = new MyTableView<>();
 		supplierId = supplierTable.createStyledColumn("Supplier Id", "supplierId", Integer.class);
@@ -38,8 +38,8 @@ public class SupplierStage {
 		supplierTable.getColumns().addAll(supplierId, name, email, phone, address);
 		supplierTable.setItems(Main.suppliers);
 		supplierTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-		supplierTable.setMinHeight(500);
-		supplierTable.setMaxWidth(800);
+		supplierTable.setMaxHeight(600);
+		supplierTable.setMaxWidth(1100);
 
 		add = new MyButton("➕ Add", 2);
 		update = new MyButton("✎ Edit", 2);
@@ -265,14 +265,17 @@ public class SupplierStage {
 		HBox buttons = new HBox(10, add, update, remove);
 		buttons.setAlignment(Pos.CENTER);
 
-		VBox all = new VBox(10, buttons, supplierTable);
+	    all = new VBox(10, buttons, supplierTable);
 		all.setAlignment(Pos.CENTER);
 
-		Scene scene = new Scene(all, 1000, 700);
-		scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
-		Stage stage = new Stage();
-		stage.setTitle("Supplier Stage");
-		stage.setScene(scene);
-		stage.show();
+//		Scene scene = new Scene(all, 1000, 700);
+//		scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+//		Stage stage = new Stage();
+//		stage.setTitle("Supplier Stage");
+//		stage.setScene(scene);
+//		stage.show();
+	}
+	public VBox getAll () {
+		return all;
 	}
 }

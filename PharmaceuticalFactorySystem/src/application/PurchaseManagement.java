@@ -27,7 +27,7 @@ public class PurchaseManagement {
 	private TableColumn<PurchaseOrder, Integer> orderId, empId;
 	private TableColumn<PurchaseOrder, Double> total;
 	private TableColumn<PurchaseOrder, String> date;
-
+	private VBox allLeft;
 	public PurchaseManagement() {
 		showPurchases = new MyLabel("Suppliers Purchases", 2);
 		for (int i = 0 ;i < Main.suppliers.size(); i++) {
@@ -93,7 +93,7 @@ public class PurchaseManagement {
 		purchaseButtonsHBox.getChildren().addAll(newPurchase, deletePurchase, viewPurchaseDetails);
 		purchaseButtonsHBox.setAlignment(Pos.CENTER);
 
-		VBox allLeft = new VBox(10);
+	    allLeft = new VBox(10);
 		allLeft.getChildren().addAll(showPurchases, suppliers, purchaseTable, purchaseButtonsHBox);
 		allLeft.setAlignment(Pos.CENTER);
 
@@ -190,10 +190,13 @@ public class PurchaseManagement {
 			}
 		});
 
-		Scene scene = new Scene(allLeft, 800, 750);
-		scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
-		Stage stage = new Stage();
-		stage.setScene(scene);
-		stage.show();
+//		Scene scene = new Scene(allLeft, 800, 750);
+//		scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+//		Stage stage = new Stage();
+//		stage.setScene(scene);
+//		stage.show();
+	}
+	public VBox getAll() {
+		return allLeft;
 	}
 }

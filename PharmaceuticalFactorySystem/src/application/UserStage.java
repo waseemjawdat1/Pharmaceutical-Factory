@@ -299,13 +299,13 @@ public class UserStage {
 		all = new VBox(10, searchBox, buttons, userTable);
 		all.setAlignment(Pos.CENTER);
 
-		Scene scene = new Scene(all, 800, 700);
-		scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+		//Scene scene = new Scene(all, 800, 700);
+		//scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 
-		Stage stage = new Stage();
-		stage.setScene(scene);
-		stage.setTitle("User");
-		stage.show();
+	//	Stage stage = new Stage();
+	///	stage.setScene(scene);
+	//	stage.setTitle("User");
+		//stage.show();
 	}
 
 	public TableView<User> getUserTable() {

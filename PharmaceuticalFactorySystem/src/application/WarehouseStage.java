@@ -27,7 +27,7 @@ public class WarehouseStage {
 	private TableColumn<Warehouse, Integer> id, capacity;
 	private TableColumn<Warehouse, String> location;
 	private Button add, update, remove;
-
+	private VBox all;
 	public WarehouseStage() {
 		warehouseTable = new MyTableView<>();
 		id = warehouseTable.createStyledColumn("Warehouse ID", "warehouseId", Integer.class);
@@ -252,13 +252,16 @@ public class WarehouseStage {
 			}
 		});
 
-		VBox all = new VBox(10, searchBox, buttons, warehouseTable);
+	    all = new VBox(10, searchBox, buttons, warehouseTable);
 		all.setAlignment(Pos.CENTER);
-		Scene scene = new Scene(all, 800, 700);
-		scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
-		Stage stage = new Stage();
-		stage.setTitle("Warehouse Stage");
-		stage.setScene(scene);
-		stage.show();
+//		Scene scene = new Scene(all, 800, 700);
+//		scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+//		Stage stage = new Stage();
+//		stage.setTitle("Warehouse Stage");
+//		stage.setScene(scene);
+//		stage.show();
+	}
+	public VBox getAll() {
+		return all;
 	}
 }

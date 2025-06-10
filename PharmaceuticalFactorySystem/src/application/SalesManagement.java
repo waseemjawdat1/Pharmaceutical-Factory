@@ -33,7 +33,7 @@ public class SalesManagement {
 	private TableColumn<SalesOrder, Integer> orderId, empId;
 	private TableColumn<SalesOrder, Double> total;
 	private TableColumn<SalesOrder, String> date;
-
+	private VBox allLeft;
 	public SalesManagement() {
 		showOrders = new MyLabel("Customers Orders", 2);
 		for (int i = 0; i < Main.customers.size(); i++) {
@@ -98,7 +98,7 @@ public class SalesManagement {
 		orderButtonsHBox.getChildren().addAll(newOrder, deleteOrder, viewOrderDetails);
 		orderButtonsHBox.setAlignment(Pos.CENTER);
 
-		VBox allLeft = new VBox(10);
+		allLeft = new VBox(10);
 		allLeft.getChildren().addAll(showOrders, customers, ordersTable, orderButtonsHBox);
 		allLeft.setAlignment(Pos.CENTER);
 
@@ -201,10 +201,13 @@ public class SalesManagement {
 
 		});
 
-		Scene scene = new Scene(allLeft, 800, 750);
-		scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
-		Stage stage = new Stage();
-		stage.setScene(scene);
-		stage.show();
+//		Scene scene = new Scene(allLeft, 800, 750);
+//		scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+//		Stage stage = new Stage();
+//		stage.setScene(scene);
+//		stage.show();
+	}
+	public VBox getAll() {
+		return allLeft;
 	}
 }

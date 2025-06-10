@@ -27,7 +27,7 @@ public class CustomerStage {
 	private TableColumn<Customer, Integer> id;
 	private TableColumn<Customer, String> name, email, phone, address;
 	private Button add, update, remove;
-
+	private VBox all;
 	public CustomerStage() {
 		customerTable = new MyTableView<>();
 		id = customerTable.createStyledColumn("ID", "customerId", Integer.class);
@@ -324,13 +324,16 @@ public class CustomerStage {
 			}
 		});
 
-		VBox all = new VBox(10, searchBox, buttons, customerTable);
+		 all = new VBox(10, searchBox, buttons, customerTable);
 		all.setAlignment(Pos.CENTER);
-		Scene scene = new Scene(all, 1000, 700);
-		scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
-		Stage stage = new Stage();
-		stage.setTitle("Customer Stage");
-		stage.setScene(scene);
-		stage.show();
+//		Scene scene = new Scene(all, 1000, 700);
+//		scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+//		Stage stage = new Stage();
+//		stage.setTitle("Customer Stage");
+//		stage.setScene(scene);
+//		stage.show();
+	}
+	public VBox getAll () {
+		return all;
 	}
 }

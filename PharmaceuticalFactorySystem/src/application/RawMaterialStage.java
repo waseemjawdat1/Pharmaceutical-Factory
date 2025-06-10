@@ -32,7 +32,7 @@ public class RawMaterialStage {
 	private TextField search;
 	private Label searchByMaterialName;
 	private VBox all;
-
+		
 	public RawMaterialStage() {
 
 		materialTable = new MyTableView<>();
@@ -369,12 +369,15 @@ public class RawMaterialStage {
 
 		all = new VBox(10, searchBox, buttons, materialTable);
 		all.setAlignment(Pos.CENTER);
-
-		Scene scene = new Scene(all, 1050, 750);
-		scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
-		Stage stage = new Stage();
-		stage.setTitle("Raw Material Stage");
-		stage.setScene(scene);
-		stage.show();
+//
+//		Scene scene = new Scene(all, 1050, 750);
+//		scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+//		Stage stage = new Stage();
+//		stage.setTitle("Raw Material Stage");
+//		stage.setScene(scene);
+//		stage.show();
+	}
+	public VBox getAll () {
+		return all;
 	}
 }

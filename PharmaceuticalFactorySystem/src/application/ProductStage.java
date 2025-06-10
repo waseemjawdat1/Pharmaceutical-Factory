@@ -22,6 +22,7 @@ public class ProductStage {
 	private TableColumn<Product, String> name, category, warehouseId;
 	private Button add, update, remove;
 	private TableColumn<Product, Double> price;
+	private VBox all;
 	public ProductStage() {
 		productTable = new MyTableView<>();
 		id = productTable.createStyledColumn("Product ID", "productId", Integer.class);
@@ -367,13 +368,16 @@ public class ProductStage {
 			}
 		});
 
-		VBox all = new VBox(10,searchBox, buttons, productTable);
+		all = new VBox(10,searchBox, buttons, productTable);
 		all.setAlignment(Pos.CENTER);
-		Scene scene = new Scene(all, 1100, 700);
-		scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
-		Stage stage = new Stage();
-		stage.setTitle("Product Stage");
-		stage.setScene(scene);
-		stage.show();
+//		Scene scene = new Scene(all, 1100, 700);
+//		scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+//		Stage stage = new Stage();
+//		stage.setTitle("Product Stage");
+//		stage.setScene(scene);
+//		stage.show();
+	}
+	public VBox getAll() {
+		return all;
 	}
 }

@@ -259,10 +259,13 @@ public class LoginScene {
             checkdata.setString(2, passwordField.getText().trim());
             
             ResultSet r = checkdata.executeQuery();
+            int empId;
+            String role;
             if (r.next()) {
             	int id = r.getInt("user_id");
                 String name = r.getString("username");
-                String role = r.getString("role");
+                 role = r.getString("role");
+                 empId = r.getInt("employee_id");
                 showModernAlert(true, "Welcome " + name, "Logged in as " + role);
                 for (int i = 0; i  < Main.users.size(); i++) {
                 	if (Main.users.get(i).getUserId() == id) {
@@ -270,8 +273,15 @@ public class LoginScene {
                 		break;
                 	}
                 }
+                String eName = null;
+                for (int i = 0; i < Main.employees.size(); i++) {
+                	if (Main.employees.get(i).getEmployeeId() == empId) {
+                		eName = Main.employees.get(i).getName();
+                		break;
+                	}
+                }
               //  new UserStage();
-               new SalesStatistics();
+               new GeneralStage(role,eName);
             } else {
                 showModernAlert(false, "Login Failed", "Invalid username or password");
             }

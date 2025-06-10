@@ -121,13 +121,13 @@ public class EmployeeStage {
 		all.getChildren().addAll(searchLTF, buttons, employeeTableView);
 		all.setAlignment(Pos.CENTER);
 
-		employeeScene = new Scene(all, 1350, 700);
-		employeeScene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
-
-		employeeStage = new Stage();
-		employeeStage.setScene(employeeScene);
-		employeeStage.setTitle("Employee");
-		employeeStage.show();
+//		employeeScene = new Scene(all, 1350, 700);
+//		employeeScene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+//
+//		employeeStage = new Stage();
+//		employeeStage.setScene(employeeScene);
+//		employeeStage.setTitle("Employee");
+//		employeeStage.show();
 
 		addEmpB.setOnAction(e -> {
 			Label nameL = new MyLabel("Name : ");
