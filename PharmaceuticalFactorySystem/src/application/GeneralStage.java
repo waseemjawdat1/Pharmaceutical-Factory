@@ -45,7 +45,7 @@ public class GeneralStage {
 			});
 			addNavigationTab("Departments", () -> {
 				setPageTitle("Department Management");
-				setContent((VBox) (new DepartmentStage().getAll()));
+				setContent((VBox) (new DepartmentStage1().getAll()));
 			});
 			addNavigationTab("Employees", () -> {
 				setPageTitle("Employee Management");
