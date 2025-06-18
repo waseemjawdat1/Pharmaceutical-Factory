@@ -15,13 +15,15 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
 import java.sql.*;
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.*;
 
 public class ProductionStatistics {
 
 	private Stage mainStage;
-	private final ComboBox<Integer> monthBox = new ComboBox<>();
-	private final ComboBox<Integer> yearBox = new ComboBox<>();
+	private final DatePicker fromDatePicker = new DatePicker();
+	private final DatePicker toDatePicker = new DatePicker();
 	private VBox all;
 
 	public ProductionStatistics() {
@@ -33,9 +35,11 @@ public class ProductionStatistics {
 
 		all.getChildren().addAll(datePanel, cardsGrid);
 	}
+	
 	public VBox getAll() {
 		return all;
 	}
+	
 	private Label createTitle() {
 		Label titleLabel = new Label("🏭 Production Analytics Dashboard");
 		titleLabel.setFont(Font.font("Segoe UI", FontWeight.BOLD, 42));
@@ -70,7 +74,7 @@ public class ProductionStatistics {
 		panelShadow.setOffsetY(8);
 		datePanel.setEffect(panelShadow);
 
-		setupComboBoxes();
+		setupDatePickers();
 
 		Label dateIcon = new Label("📅");
 		dateIcon.setFont(Font.font(24));
@@ -79,29 +83,28 @@ public class ProductionStatistics {
 		selectLabel.setFont(Font.font("Georgia", FontWeight.SEMI_BOLD, 18));
 		selectLabel.setTextFill(Color.BLACK);
 
-		Label monthLabel = new Label("Month:");
-		monthLabel.setFont(Font.font("Georgia", FontWeight.MEDIUM, 16));
-		monthLabel.setTextFill(Color.BLACK);
+		Label fromLabel = new Label("From:");
+		fromLabel.setFont(Font.font("Georgia", FontWeight.MEDIUM, 16));
+		fromLabel.setTextFill(Color.BLACK);
 
-		Label yearLabel = new Label("Year:");
-		yearLabel.setFont(Font.font("Georgia", FontWeight.MEDIUM, 16));
-		yearLabel.setTextFill(Color.BLACK);
+		Label toLabel = new Label("To:");
+		toLabel.setFont(Font.font("Georgia", FontWeight.MEDIUM, 16));
+		toLabel.setTextFill(Color.BLACK);
 
-		datePanel.getChildren().addAll(dateIcon, selectLabel, monthLabel, monthBox, yearLabel, yearBox);
+		datePanel.getChildren().addAll(dateIcon, selectLabel, fromLabel, fromDatePicker, toLabel, toDatePicker);
 
 		return datePanel;
 	}
 
-	private void setupComboBoxes() {
-		for (int i = 1; i <= 12; i++)
-			monthBox.getItems().add(i);
-		for (int y = 2020; y <= 2030; y++)
-			yearBox.getItems().add(y);
+	private void setupDatePickers() {
+		// Set default values - last 30 days
+		toDatePicker.setValue(LocalDate.now());
+		fromDatePicker.setValue(LocalDate.now().minusDays(30));
 
-		monthBox.setPromptText("Select Month");
-		yearBox.setPromptText("Select Year");
+		fromDatePicker.setPromptText("Select Start Date");
+		toDatePicker.setPromptText("Select End Date");
 
-		String comboStyle = """
+		String datePickerStyle = """
 				-fx-background-color: white;
 				-fx-border-color: #cccccc;
 				-fx-border-radius: 12;
@@ -113,8 +116,26 @@ public class ProductionStatistics {
 				-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 8, 0, 0, 3);
 				""";
 
-		monthBox.setStyle(comboStyle);
-		yearBox.setStyle(comboStyle);
+		fromDatePicker.setStyle(datePickerStyle);
+		toDatePicker.setStyle(datePickerStyle);
+
+		// Add hover effects
+		String hoverStyle = """
+				-fx-background-color: #f8f9fa;
+				-fx-border-color: #4ECDC4;
+				-fx-border-radius: 12;
+				-fx-background-radius: 12;
+				-fx-padding: 12 16;
+				-fx-font-size: 14px;
+				-fx-font-weight: bold;
+				-fx-pref-width: 210;
+				-fx-effect: dropshadow(three-pass-box, rgba(78,205,196,0.3), 12, 0, 0, 4);
+				""";
+
+		fromDatePicker.setOnMouseEntered(e -> fromDatePicker.setStyle(hoverStyle));
+		fromDatePicker.setOnMouseExited(e -> fromDatePicker.setStyle(datePickerStyle));
+		toDatePicker.setOnMouseEntered(e -> toDatePicker.setStyle(hoverStyle));
+		toDatePicker.setOnMouseExited(e -> toDatePicker.setStyle(datePickerStyle));
 	}
 
 	private GridPane createCardsGrid() {
@@ -245,11 +266,11 @@ public class ProductionStatistics {
 	}
 
 	private boolean validateInput() {
-		if (monthBox.getValue() == null || yearBox.getValue() == null) {
+		if (fromDatePicker.getValue() == null || toDatePicker.getValue() == null) {
 			Alert alert = new Alert(Alert.AlertType.WARNING);
 			alert.setTitle("Input Required");
-			alert.setHeaderText("Please select both month and year");
-			alert.setContentText("Both month and year must be selected to generate the chart.");
+			alert.setHeaderText("Please select both start and end dates");
+			alert.setContentText("Both from and to dates must be selected to generate the chart.");
 
 			DialogPane dialogPane = alert.getDialogPane();
 			dialogPane.setStyle("""
@@ -260,6 +281,23 @@ public class ProductionStatistics {
 			alert.showAndWait();
 			return false;
 		}
+
+		if (fromDatePicker.getValue().isAfter(toDatePicker.getValue())) {
+			Alert alert = new Alert(Alert.AlertType.WARNING);
+			alert.setTitle("Invalid Date Range");
+			alert.setHeaderText("Start date must be before end date");
+			alert.setContentText("Please ensure the 'from' date is earlier than the 'to' date.");
+
+			DialogPane dialogPane = alert.getDialogPane();
+			dialogPane.setStyle("""
+					-fx-background-color: white;
+					-fx-font-family: 'Segoe UI';
+					""");
+
+			alert.showAndWait();
+			return false;
+		}
+
 		return true;
 	}
 
@@ -295,15 +333,15 @@ public class ProductionStatistics {
 				SELECT p.category, SUM(pb.quantity_produced) AS total_production
 				FROM products p
 				JOIN production_batches pb ON p.product_id = pb.product_id
-				WHERE MONTH(pb.production_date) = ? AND YEAR(pb.production_date) = ?
+				WHERE pb.production_date BETWEEN ? AND ?
 				AND p.active = 1
 				GROUP BY p.category
 				ORDER BY total_production DESC
 				""";
 
 		try (PreparedStatement stmt = Main.conn.prepareStatement(sql)) {
-			stmt.setInt(1, monthBox.getValue());
-			stmt.setInt(2, yearBox.getValue());
+			stmt.setDate(1, Date.valueOf(fromDatePicker.getValue()));
+			stmt.setDate(2, Date.valueOf(toDatePicker.getValue()));
 			ResultSet rs = stmt.executeQuery();
 			while (rs.next()) {
 				data.add(new PieChart.Data(rs.getString("category"), rs.getInt("total_production")));
@@ -313,8 +351,8 @@ public class ProductionStatistics {
 			chart.setTitle("Production Distribution by Category");
 			styleChart(chart);
 
-			Label infoLabel = new Label("🎯 Total production quantity distributed across product categories for "
-					+ getMonthName(monthBox.getValue()) + " " + yearBox.getValue());
+			Label infoLabel = new Label("🎯 Total production quantity distributed across product categories from "
+					+ fromDatePicker.getValue() + " to " + toDatePicker.getValue());
 			infoLabel.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 14));
 			infoLabel.setWrapText(true);
 			infoLabel.setTextFill(Color.rgb(100, 100, 100));
@@ -364,7 +402,7 @@ public class ProductionStatistics {
 				SELECT p.name, AVG(pb.quantity_produced) AS avg_production, COUNT(pb.batch_id) AS batch_count
 				FROM products p
 				JOIN production_batches pb ON p.product_id = pb.product_id
-				WHERE MONTH(pb.production_date) = ? AND YEAR(pb.production_date) = ?
+				WHERE pb.production_date BETWEEN ? AND ?
 				AND p.active = 1
 				GROUP BY p.product_id, p.name
 				HAVING batch_count >= 2
@@ -372,8 +410,8 @@ public class ProductionStatistics {
 				""";
 
 		try (PreparedStatement stmt = Main.conn.prepareStatement(sql)) {
-			stmt.setInt(1, monthBox.getValue());
-			stmt.setInt(2, yearBox.getValue());
+			stmt.setDate(1, Date.valueOf(fromDatePicker.getValue()));
+			stmt.setDate(2, Date.valueOf(toDatePicker.getValue()));
 			ResultSet rs = stmt.executeQuery();
 			while (rs.next()) {
 				series.getData().add(new XYChart.Data<>(rs.getString("name"), rs.getDouble("avg_production")));
@@ -382,8 +420,8 @@ public class ProductionStatistics {
 			styleChart(chart);
 
 			Label infoLabel = new Label(
-					"📊 Average production quantity per batch for products with multiple batches in "
-							+ getMonthName(monthBox.getValue()) + " " + yearBox.getValue());
+					"📊 Average production quantity per batch for products with multiple batches from "
+							+ fromDatePicker.getValue() + " to " + toDatePicker.getValue());
 			infoLabel.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 14));
 			infoLabel.setWrapText(true);
 			infoLabel.setTextFill(Color.rgb(100, 100, 100));
@@ -429,21 +467,20 @@ public class ProductionStatistics {
 		XYChart.Series<String, Number> series = new XYChart.Series<>();
 		series.setName("Velocity Score");
 
-		// Complex query with multiple aggregations and calculations
 		String sql = """
 				SELECT pb.production_date,
 				       COUNT(pb.batch_id) * AVG(pb.quantity_produced) AS velocity_score
 				FROM production_batches pb
 				JOIN products p ON pb.product_id = p.product_id
-				WHERE MONTH(pb.production_date) = ? AND YEAR(pb.production_date) = ?
+				WHERE pb.production_date BETWEEN ? AND ?
 				AND p.active = 1
 				GROUP BY pb.production_date
 				ORDER BY pb.production_date
 				""";
 
 		try (PreparedStatement stmt = Main.conn.prepareStatement(sql)) {
-			stmt.setInt(1, monthBox.getValue());
-			stmt.setInt(2, yearBox.getValue());
+			stmt.setDate(1, Date.valueOf(fromDatePicker.getValue()));
+			stmt.setDate(2, Date.valueOf(toDatePicker.getValue()));
 			ResultSet rs = stmt.executeQuery();
 			while (rs.next()) {
 				series.getData().add(
@@ -453,8 +490,8 @@ public class ProductionStatistics {
 			chart.getData().add(series);
 			styleChart(chart);
 
-			Label infoLabel = new Label("⚡ Daily production velocity calculated as batch count × average quantity for "
-					+ getMonthName(monthBox.getValue()) + " " + yearBox.getValue());
+			Label infoLabel = new Label("⚡ Daily production velocity calculated as batch count × average quantity from "
+					+ fromDatePicker.getValue() + " to " + toDatePicker.getValue());
 			infoLabel.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 14));
 			infoLabel.setWrapText(true);
 			infoLabel.setTextFill(Color.rgb(100, 100, 100));
@@ -500,7 +537,6 @@ public class ProductionStatistics {
 		XYChart.Series<String, Number> series = new XYChart.Series<>();
 		series.setName("Required Quantity");
 
-		// Complex query with subquery and multiple JOINs
 		String sql = """
 				    SELECT rm.name,
 				           SUM(pr.quantity * pb.quantity_produced) AS total_material_needed
@@ -508,7 +544,7 @@ public class ProductionStatistics {
 				    JOIN product_requirements pr ON rm.material_id = pr.material_id
 				    JOIN products p ON pr.product_id = p.product_id
 				    JOIN production_batches pb ON p.product_id = pb.product_id
-				    WHERE MONTH(pb.production_date) = ? AND YEAR(pb.production_date) = ?
+				    WHERE pb.production_date BETWEEN ? AND ?
 				    AND rm.active = 1 AND p.active = 1
 				    GROUP BY rm.material_id, rm.name
 				    ORDER BY total_material_needed DESC
@@ -516,8 +552,8 @@ public class ProductionStatistics {
 				""";
 
 		try (PreparedStatement stmt = Main.conn.prepareStatement(sql)) {
-			stmt.setInt(1, monthBox.getValue());
-			stmt.setInt(2, yearBox.getValue());
+			stmt.setDate(1, Date.valueOf(fromDatePicker.getValue()));
+			stmt.setDate(2, Date.valueOf(toDatePicker.getValue()));
 			ResultSet rs = stmt.executeQuery();
 			while (rs.next()) {
 				series.getData().add(new XYChart.Data<>(rs.getString("name"), rs.getInt("total_material_needed")));
@@ -526,8 +562,8 @@ public class ProductionStatistics {
 			chart.getData().add(series);
 			styleChart(chart);
 
-			Label infoLabel = new Label("📈 Top 10 materials by total required quantity based on actual production for "
-					+ getMonthName(monthBox.getValue()) + " " + yearBox.getValue());
+			Label infoLabel = new Label("📈 Top 10 materials by total required quantity based on actual production from "
+					+ fromDatePicker.getValue() + " to " + toDatePicker.getValue());
 			infoLabel.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 14));
 			infoLabel.setWrapText(true);
 			infoLabel.setTextFill(Color.rgb(100, 100, 100));
@@ -580,13 +616,13 @@ public class ProductionStatistics {
 				           SUM(pb.quantity_produced) AS total_produced
 				    FROM products p
 				    JOIN production_batches pb ON p.product_id = pb.product_id
-				    WHERE MONTH(pb.production_date) = ? AND YEAR(pb.production_date) = ?
+				    WHERE pb.production_date BETWEEN ? AND ?
 				    AND p.active = 1
 				    AND pb.quantity_produced > (
 				        SELECT AVG(quantity_produced)
 				        FROM production_batches pb2
 				        JOIN products p2 ON pb2.product_id = p2.product_id
-				        WHERE MONTH(pb2.production_date) = ? AND YEAR(pb2.production_date) = ?
+				        WHERE pb2.production_date BETWEEN ? AND ?
 				        AND p2.active = 1
 				    )
 				    GROUP BY p.product_id, p.name
@@ -596,10 +632,10 @@ public class ProductionStatistics {
 				""";
 
 		try (PreparedStatement stmt = Main.conn.prepareStatement(sql)) {
-			stmt.setInt(1, monthBox.getValue());
-			stmt.setInt(2, yearBox.getValue());
-			stmt.setInt(3, monthBox.getValue());
-			stmt.setInt(4, yearBox.getValue());
+			stmt.setDate(1, Date.valueOf(fromDatePicker.getValue()));
+			stmt.setDate(2, Date.valueOf(toDatePicker.getValue()));
+			stmt.setDate(3, Date.valueOf(fromDatePicker.getValue()));
+			stmt.setDate(4, Date.valueOf(toDatePicker.getValue()));
 			ResultSet rs = stmt.executeQuery();
 			while (rs.next()) {
 				series.getData().add(new XYChart.Data<>(rs.getString("name"), rs.getInt("performance_score")));
@@ -609,8 +645,8 @@ public class ProductionStatistics {
 			styleChart(chart);
 
 			Label infoLabel = new Label(
-					"🏆 Top performing products with above-average production and multiple batches for "
-							+ getMonthName(monthBox.getValue()) + " " + yearBox.getValue());
+					"🏆 Top performing products with above-average production and multiple batches from "
+							+ fromDatePicker.getValue() + " to " + toDatePicker.getValue());
 			infoLabel.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 14));
 			infoLabel.setWrapText(true);
 			infoLabel.setTextFill(Color.rgb(100, 100, 100));
@@ -659,16 +695,6 @@ public class ProductionStatistics {
 						+ "    -fx-font-family: 'Segoe UI'; " + "} " + ".axis { " + "    -fx-font-size: 11px; "
 						+ "    -fx-font-family: 'Segoe UI'; " + "} " + ".axis-label { " + "    -fx-font-size: 12px; "
 						+ "    -fx-font-weight: bold; " + "    -fx-font-family: 'Segoe UI'; " + "}");
-	}
-
-	private String getMonthName(int month) {
-		String[] monthNames = { "January", "February", "March", "April", "May", "June", "July", "August", "September",
-				"October", "November", "December" };
-
-		if (month >= 1 && month <= 12) {
-			return monthNames[month - 1];
-		}
-		return "Unknown";
 	}
 
 	public Scene getScene() {

@@ -174,6 +174,11 @@ public class ProductStage {
 			        Date expiryDate = Date.valueOf(expiryPicker.getValue());
 			        Date productionDate = new Date(Calendar.getInstance().getTimeInMillis());
 
+			        if (expiryDate.before(productionDate)) {
+			            Main.notValidAlert("Invalid Date", "Expiry date cannot be before today.");
+			            return;
+			        }
+
 			        try {
 			            selected.updateProduct(
 			                selected.getName(),
@@ -184,7 +189,6 @@ public class ProductStage {
 			            );
 			            productTable.refresh();
 
-			            
 			            ProductionBatch batch = new ProductionBatch(
 			                selected.getProductId(), toProduce, productionDate, expiryDate
 			            );
@@ -196,6 +200,7 @@ public class ProductStage {
 			            Main.notValidAlert("Error", ex2.getMessage());
 			        }
 			    });
+
 			});
 
 			VBox layout = new VBox(10, title, table, qtyL, qtyTF, produceBtn);
