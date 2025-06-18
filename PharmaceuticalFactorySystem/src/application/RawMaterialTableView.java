@@ -128,10 +128,22 @@ public class RawMaterialTableView {
                 });
 
                 spinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, Integer.MAX_VALUE, quantityProp.get()));
+                spinner.setEditable(true);
                 quantityProp.set(spinner.getValue());
 
                 spinner.valueProperty().addListener((obs, oldVal, newVal) -> {
                     if (newVal != null) quantityProp.set(newVal);
+                });
+                
+                spinner.getEditor().focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
+                    if (!isNowFocused) {
+                        try {
+                            int newValue = Integer.parseInt(spinner.getEditor().getText());
+                            spinner.getValueFactory().setValue(newValue);
+                        } catch (NumberFormatException e) {
+                            spinner.getEditor().setText(String.valueOf(spinner.getValue()));
+                        }
+                    }
                 });
 
                 spinner.setStyle("-fx-background-color: linear-gradient(to bottom, #ffffff, #f7fafc); -fx-border-color: #cbd5e0; -fx-border-radius: 8px; -fx-background-radius: 8px; -fx-effect: innershadow(gaussian, rgba(0,0,0,0.1), 2, 0, 0, 1);");

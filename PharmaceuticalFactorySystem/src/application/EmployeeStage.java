@@ -348,7 +348,7 @@ public class EmployeeStage {
 			nameTF.setText(selectedEmployee.getName());
 			emailTF.setText(selectedEmployee.getEmail());
 			phoneTF.setText(selectedEmployee.getPhone());
-			if (selectedEmployee.getDepartmentId() != 1)
+			if (selectedEmployee.getDepartmentId() != -1)
 				departmentIDTF.setText(selectedEmployee.getDepartmentId() + "");
 			else
 				departmentIDTF.setText("null");
@@ -501,9 +501,18 @@ public class EmployeeStage {
 					Main.notValidAlert("Invalid Input", "Select joined date");
 					return;
 				}
+				
 				Calendar joinedDateCalendar = new GregorianCalendar(joinedDate.getYear(),
 						joinedDate.getMonthValue() - 1, joinedDate.getDayOfMonth());
 
+				Calendar todayDate = Calendar.getInstance();
+				String todayDateString = todayDate.get(Calendar.DATE) + "/" + (todayDate.get(Calendar.MONTH) + 1) + "/"
+						+ todayDate.get(Calendar.YEAR);
+
+				if (todayDate.before(joinedDateCalendar)) {
+					Main.notValidAlert("Invalid input", "Joined Date must be before " + todayDateString + "!");
+					return;
+				}
 				try {
 					selectedEmployee.updateEmployee(name, email, phone, departmentId, jobTitle, salary, age,
 							joinedDateCalendar);
