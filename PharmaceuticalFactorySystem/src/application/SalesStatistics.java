@@ -15,25 +15,25 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
 import java.sql.*;
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.*;
 
 public class SalesStatistics {
 
     private Stage mainStage;
-    private final ComboBox<Integer> monthBox = new ComboBox<>();
-    private final ComboBox<Integer> yearBox = new ComboBox<>();
+    private final DatePicker fromDatePicker = new DatePicker();
+    private final DatePicker toDatePicker = new DatePicker();
     private VBox root;
+    
     public SalesStatistics() {
-
          root = new VBox(30);
         root.setPadding(new Insets(40));
 
-        
         HBox datePanel = createDateSelectionPanel();
-        
         GridPane cardsGrid = createCardsGrid();
 
-        root.getChildren().addAll( datePanel, cardsGrid);
+        root.getChildren().addAll(datePanel, cardsGrid);
     }
 
     private Label createTitle() {
@@ -70,7 +70,7 @@ public class SalesStatistics {
         panelShadow.setOffsetY(8);
         datePanel.setEffect(panelShadow);
 
-        setupComboBoxes();
+        setupDatePickers();
 
         Label dateIcon = new Label("📅");
         dateIcon.setFont(Font.font(24));
@@ -79,27 +79,28 @@ public class SalesStatistics {
         selectLabel.setFont(Font.font("Georgia", FontWeight.SEMI_BOLD, 18));
         selectLabel.setTextFill(Color.BLACK);
         
-        Label monthLabel = new Label("Month:");
-        monthLabel.setFont(Font.font("Georgia", FontWeight.MEDIUM, 16));
-        monthLabel.setTextFill(Color.BLACK);
+        Label fromLabel = new Label("From:");
+        fromLabel.setFont(Font.font("Georgia", FontWeight.MEDIUM, 16));
+        fromLabel.setTextFill(Color.BLACK);
         
-        Label yearLabel = new Label("Year:");
-        yearLabel.setFont(Font.font("Georgia", FontWeight.MEDIUM, 16));
-        yearLabel.setTextFill(Color.BLACK);
+        Label toLabel = new Label("To:");
+        toLabel.setFont(Font.font("Georgia", FontWeight.MEDIUM, 16));
+        toLabel.setTextFill(Color.BLACK);
 
-        datePanel.getChildren().addAll(dateIcon, selectLabel, monthLabel, monthBox, yearLabel, yearBox);
+        datePanel.getChildren().addAll(dateIcon, selectLabel, fromLabel, fromDatePicker, toLabel, toDatePicker);
         
         return datePanel;
     }
 
-    private void setupComboBoxes() {
-        for (int i = 1; i <= 12; i++) monthBox.getItems().add(i);
-        for (int y = 2020; y <= 2030; y++) yearBox.getItems().add(y);
-
-        monthBox.setPromptText("Select Month");
-        yearBox.setPromptText("Select Year");
+    private void setupDatePickers() {
+        // Set default values
+        fromDatePicker.setValue(LocalDate.now().minusDays(30));
+        toDatePicker.setValue(LocalDate.now());
         
-        String comboStyle = """
+        fromDatePicker.setPromptText("Start Date");
+        toDatePicker.setPromptText("End Date");
+        
+        String datePickerStyle = """
             -fx-background-color: white;
             -fx-border-color: #cccccc;
             -fx-border-radius: 12;
@@ -107,12 +108,25 @@ public class SalesStatistics {
             -fx-padding: 12 16;
             -fx-font-size: 14px;
             -fx-font-weight: bold;
-            -fx-pref-width: 210;
+            -fx-pref-width: 180;
             -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 8, 0, 0, 3);
             """;
         
-        monthBox.setStyle(comboStyle);
-        yearBox.setStyle(comboStyle);
+        fromDatePicker.setStyle(datePickerStyle);
+        toDatePicker.setStyle(datePickerStyle);
+        
+        // Add validation: ensure 'from' date is not after 'to' date
+        fromDatePicker.valueProperty().addListener((obs, oldDate, newDate) -> {
+            if (newDate != null && toDatePicker.getValue() != null && newDate.isAfter(toDatePicker.getValue())) {
+                toDatePicker.setValue(newDate);
+            }
+        });
+        
+        toDatePicker.valueProperty().addListener((obs, oldDate, newDate) -> {
+            if (newDate != null && fromDatePicker.getValue() != null && newDate.isBefore(fromDatePicker.getValue())) {
+                fromDatePicker.setValue(newDate);
+            }
+        });
     }
 
     private GridPane createCardsGrid() {
@@ -246,11 +260,11 @@ public class SalesStatistics {
     }
 
     private boolean validateInput() {
-        if (monthBox.getValue() == null || yearBox.getValue() == null) {
+        if (fromDatePicker.getValue() == null || toDatePicker.getValue() == null) {
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle("Input Required");
-            alert.setHeaderText("Please select both month and year");
-            alert.setContentText("Both month and year must be selected to generate the chart.");
+            alert.setHeaderText("Please select both start and end dates");
+            alert.setContentText("Both start date and end date must be selected to generate the chart.");
             
             DialogPane dialogPane = alert.getDialogPane();
             dialogPane.setStyle("""
@@ -261,6 +275,23 @@ public class SalesStatistics {
             alert.showAndWait();
             return false;
         }
+        
+        if (fromDatePicker.getValue().isAfter(toDatePicker.getValue())) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Invalid Date Range");
+            alert.setHeaderText("Start date cannot be after end date");
+            alert.setContentText("Please ensure the start date is before or equal to the end date.");
+            
+            DialogPane dialogPane = alert.getDialogPane();
+            dialogPane.setStyle("""
+                -fx-background-color: white;
+                -fx-font-family: 'Segoe UI';
+                """);
+            
+            alert.showAndWait();
+            return false;
+        }
+        
         return true;
     }
 
@@ -293,12 +324,12 @@ public class SalesStatistics {
         String sql = "SELECT e.name, SUM(so.total_amount) AS total_sales FROM sales_orders so " +
                      "JOIN employees e ON so.employee_id = e.employee_id " +
                      "JOIN departments d ON e.department_id = d.department_id " +
-                     "WHERE d.name = 'Sales' AND MONTH(so.order_date) = ? AND YEAR(so.order_date) = ? " +
+                     "WHERE d.name = 'Sales' AND so.order_date >= ? AND so.order_date <= ? " +
                      "GROUP BY e.name";
         
         try (PreparedStatement stmt = Main.conn.prepareStatement(sql)) {
-            stmt.setInt(1, monthBox.getValue());
-            stmt.setInt(2, yearBox.getValue());
+            stmt.setDate(1, Date.valueOf(fromDatePicker.getValue()));
+            stmt.setDate(2, Date.valueOf(toDatePicker.getValue()));
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 data.add(new PieChart.Data(rs.getString("name"), rs.getDouble("total_sales")));
@@ -308,8 +339,8 @@ public class SalesStatistics {
             chart.setTitle("Sales Distribution by Employee");
             styleChart(chart);
             
-            Label infoLabel = new Label("🥧 Pie chart showing total sales distribution per employee in Sales department for " + 
-                            getMonthName(monthBox.getValue()) + " " + yearBox.getValue());
+            Label infoLabel = new Label("🥧 Pie chart showing total sales distribution per employee in Sales department from " + 
+                            fromDatePicker.getValue() + " to " + toDatePicker.getValue());
             infoLabel.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 14));
             infoLabel.setWrapText(true);
             infoLabel.setTextFill(Color.rgb(100, 100, 100));
@@ -357,12 +388,12 @@ public class SalesStatistics {
         String sql = "SELECT so.order_date, COUNT(*) AS order_count FROM sales_orders so " +
                      "JOIN employees e ON so.employee_id = e.employee_id " +
                      "JOIN departments d ON e.department_id = d.department_id " +
-                     "WHERE d.name = 'Sales' AND MONTH(so.order_date) = ? AND YEAR(so.order_date) = ? " +
+                     "WHERE d.name = 'Sales' AND so.order_date >= ? AND so.order_date <= ? " +
                      "GROUP BY so.order_date ORDER BY so.order_date";
         
         try (PreparedStatement stmt = Main.conn.prepareStatement(sql)) {
-            stmt.setInt(1, monthBox.getValue());
-            stmt.setInt(2, yearBox.getValue());
+            stmt.setDate(1, Date.valueOf(fromDatePicker.getValue()));
+            stmt.setDate(2, Date.valueOf(toDatePicker.getValue()));
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 series.getData().add(new XYChart.Data<>(rs.getDate("order_date").toString(), rs.getInt("order_count")));
@@ -370,8 +401,8 @@ public class SalesStatistics {
             chart.getData().add(series);
             styleChart(chart);
             
-            Label infoLabel = new Label("📊 Bar chart displaying daily order count by Sales department for " + 
-                            getMonthName(monthBox.getValue()) + " " + yearBox.getValue());
+            Label infoLabel = new Label("📊 Bar chart displaying daily order count by Sales department from " + 
+                            fromDatePicker.getValue() + " to " + toDatePicker.getValue());
             infoLabel.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 14));
             infoLabel.setWrapText(true);
             infoLabel.setTextFill(Color.rgb(100, 100, 100));
@@ -423,13 +454,13 @@ public class SalesStatistics {
             JOIN employees e ON so.employee_id = e.employee_id
             JOIN departments dep ON e.department_id = dep.department_id
             JOIN products p ON d.product_id = p.product_id
-            WHERE dep.name = 'Sales' AND MONTH(so.order_date) = ? AND YEAR(so.order_date) = ?
+            WHERE dep.name = 'Sales' AND so.order_date >= ? AND so.order_date <= ?
             GROUP BY p.name ORDER BY total_quantity DESC LIMIT 5
         """;
 
         try (PreparedStatement stmt = Main.conn.prepareStatement(sql)) {
-            stmt.setInt(1, monthBox.getValue());
-            stmt.setInt(2, yearBox.getValue());
+            stmt.setDate(1, Date.valueOf(fromDatePicker.getValue()));
+            stmt.setDate(2, Date.valueOf(toDatePicker.getValue()));
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 series.getData().add(new XYChart.Data<>(rs.getString("name"), rs.getInt("total_quantity")));
@@ -438,8 +469,8 @@ public class SalesStatistics {
             chart.getData().add(series);
             styleChart(chart);
             
-            Label infoLabel = new Label("🏆 Top 5 products by quantity sold by Sales department in " + 
-                            getMonthName(monthBox.getValue()) + " " + yearBox.getValue());
+            Label infoLabel = new Label("🏆 Top 5 products by quantity sold by Sales department from " + 
+                            fromDatePicker.getValue() + " to " + toDatePicker.getValue());
             infoLabel.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 14));
             infoLabel.setWrapText(true);
             infoLabel.setTextFill(Color.rgb(100, 100, 100));
@@ -489,13 +520,13 @@ public class SalesStatistics {
             FROM sales_orders so
             JOIN employees e ON so.employee_id = e.employee_id
             JOIN departments d ON e.department_id = d.department_id
-            WHERE d.name = 'Sales' AND MONTH(so.order_date) = ? AND YEAR(so.order_date) = ?
+            WHERE d.name = 'Sales' AND so.order_date >= ? AND so.order_date <= ?
             GROUP BY so.order_date ORDER BY so.order_date
         """;
 
         try (PreparedStatement stmt = Main.conn.prepareStatement(sql)) {
-            stmt.setInt(1, monthBox.getValue());
-            stmt.setInt(2, yearBox.getValue());
+            stmt.setDate(1, Date.valueOf(fromDatePicker.getValue()));
+            stmt.setDate(2, Date.valueOf(toDatePicker.getValue()));
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 series.getData().add(new XYChart.Data<>(rs.getDate("order_date").toString(), rs.getDouble("daily_sales")));
@@ -504,8 +535,8 @@ public class SalesStatistics {
             chart.getData().add(series);
             styleChart(chart);
             
-            Label infoLabel = new Label("📈 Daily sales trend showing total revenue by Sales department for " + 
-                            getMonthName(monthBox.getValue()) + " " + yearBox.getValue());
+            Label infoLabel = new Label("📈 Daily sales trend showing total revenue by Sales department from " + 
+                            fromDatePicker.getValue() + " to " + toDatePicker.getValue());
             infoLabel.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 14));
             infoLabel.setWrapText(true);
             infoLabel.setTextFill(Color.rgb(100, 100, 100));
@@ -553,13 +584,13 @@ public class SalesStatistics {
             FROM sales_orders so
             JOIN employees e ON so.employee_id = e.employee_id
             JOIN departments d ON e.department_id = d.department_id
-            WHERE d.name = 'Sales' AND MONTH(so.order_date) = ? AND YEAR(so.order_date) = ?
+            WHERE d.name = 'Sales' AND so.order_date >= ? AND so.order_date <= ?
             GROUP BY e.name, so.order_date ORDER BY e.name, so.order_date
         """;
 
         try (PreparedStatement stmt = Main.conn.prepareStatement(sql)) {
-            stmt.setInt(1, monthBox.getValue());
-            stmt.setInt(2, yearBox.getValue());
+            stmt.setDate(1, Date.valueOf(fromDatePicker.getValue()));
+            stmt.setDate(2, Date.valueOf(toDatePicker.getValue()));
             ResultSet rs = stmt.executeQuery();
 
             Map<String, XYChart.Series<String, Number>> seriesMap = new LinkedHashMap<>();
@@ -576,8 +607,8 @@ public class SalesStatistics {
             chart.getData().addAll(seriesMap.values());
             styleChart(chart);
             
-            Label infoLabel = new Label("👥 Employee performance comparison showing daily sales distribution for " + 
-                            getMonthName(monthBox.getValue()) + " " + yearBox.getValue());
+            Label infoLabel = new Label("👥 Employee performance comparison showing daily sales distribution from " + 
+                            fromDatePicker.getValue() + " to " + toDatePicker.getValue());
             infoLabel.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 14));
             infoLabel.setWrapText(true);
             infoLabel.setTextFill(Color.rgb(100, 100, 100));
@@ -602,12 +633,6 @@ public class SalesStatistics {
         chart.setPrefSize(800, 500);
     }
     
-    private String getMonthName(int month) {
-        String[] months = {"", "January", "February", "March", "April", "May", "June",
-                          "July", "August", "September", "October", "November", "December"};
-        return months[month];
-    }
-    
     private void showDatabaseError(SQLException ex) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Database Error");
@@ -623,8 +648,8 @@ public class SalesStatistics {
         alert.showAndWait();
         ex.printStackTrace();
     }
+    
     public VBox getAll() {
-    	return root;
+        return root;
     }
-   
 }
