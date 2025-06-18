@@ -609,56 +609,36 @@ public class ProductionStatistics {
 		XYChart.Series<String, Number> series = new XYChart.Series<>();
 		series.setName("Performance Score");
 
-		String sql = """
-				    SELECT p.name,
-				           SUM(pb.quantity_produced) + (COUNT(pb.batch_id) * 10) AS performance_score,
-				           COUNT(pb.batch_id) AS batch_count,
-				           SUM(pb.quantity_produced) AS total_produced
-				    FROM products p
-				    JOIN production_batches pb ON p.product_id = pb.product_id
-				    WHERE pb.production_date BETWEEN ? AND ?
-				    AND p.active = 1
-				    AND pb.quantity_produced > (
-				        SELECT AVG(quantity_produced)
-				        FROM production_batches pb2
-				        JOIN products p2 ON pb2.product_id = p2.product_id
-				        WHERE pb2.production_date BETWEEN ? AND ?
-				        AND p2.active = 1
-				    )
-				    GROUP BY p.product_id, p.name
-				    HAVING batch_count >= 2 AND total_produced > 50
-				    ORDER BY performance_score DESC
-				    LIMIT 8
-				""";
+	
 
-		try (PreparedStatement stmt = Main.conn.prepareStatement(sql)) {
-			stmt.setDate(1, Date.valueOf(fromDatePicker.getValue()));
-			stmt.setDate(2, Date.valueOf(toDatePicker.getValue()));
-			stmt.setDate(3, Date.valueOf(fromDatePicker.getValue()));
-			stmt.setDate(4, Date.valueOf(toDatePicker.getValue()));
-			ResultSet rs = stmt.executeQuery();
-			while (rs.next()) {
-				series.getData().add(new XYChart.Data<>(rs.getString("name"), rs.getInt("performance_score")));
-			}
-
-			chart.getData().add(series);
-			styleChart(chart);
-
-			Label infoLabel = new Label(
-					"🏆 Top performing products with above-average production and multiple batches from "
-							+ fromDatePicker.getValue() + " to " + toDatePicker.getValue());
-			infoLabel.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 14));
-			infoLabel.setWrapText(true);
-			infoLabel.setTextFill(Color.rgb(100, 100, 100));
-			infoLabel.setAlignment(Pos.CENTER);
-
-			chartContainer.getChildren().addAll(chart, infoLabel);
-			root.setCenter(chartContainer);
-
-		} catch (SQLException ex) {
-			showDatabaseError(ex);
-			return;
-		}
+//		try (PreparedStatement stmt = Main.conn.prepareStatement(sql)) {
+//			stmt.setDate(1, Date.valueOf(fromDatePicker.getValue()));
+//			stmt.setDate(2, Date.valueOf(toDatePicker.getValue()));
+//			stmt.setDate(3, Date.valueOf(fromDatePicker.getValue()));
+//			stmt.setDate(4, Date.valueOf(toDatePicker.getValue()));
+//			ResultSet rs = stmt.executeQuery();
+//			while (rs.next()) {
+//				series.getData().add(new XYChart.Data<>(rs.getString("name"), rs.getInt("performance_score")));
+//			}
+//
+//			chart.getData().add(series);
+//			styleChart(chart);
+//
+//			Label infoLabel = new Label(
+//					"🏆 Top performing products with above-average production and multiple batches from "
+//							+ fromDatePicker.getValue() + " to " + toDatePicker.getValue());
+//			infoLabel.setFont(Font.font("Segoe UI", FontWeight.NORMAL, 14));
+//			infoLabel.setWrapText(true);
+//			infoLabel.setTextFill(Color.rgb(100, 100, 100));
+//			infoLabel.setAlignment(Pos.CENTER);
+//
+//			chartContainer.getChildren().addAll(chart, infoLabel);
+//			root.setCenter(chartContainer);
+//
+//		} catch (SQLException ex) {
+//			showDatabaseError(ex);
+//			return;
+//		}
 
 		Scene scene = new Scene(root);
 		stage.setScene(scene);
